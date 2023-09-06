@@ -1,5 +1,11 @@
 # DynmapBot
 
+### Demonstration
+> ```
+> .Tr hyesan Kimosaki New_Osaka Kamabo 1.12.21 15.12.21 1.1.22 15.1.22 19.1.22 20.1.22 21.1.22 22.1.22 23.1.22 24.1.22 25.1.22 30.1.22 31.1.22 1.2.22 2.2.22 3.2.22 4.2.22 5.2.22 6.2.22 7.2.22 8.2.22
+> ```
+![Image GIF](https://cdn.discordapp.com/attachments/646287367501512725/940809737178587236/image.gif)
+
 ## Developer Notes
 This bot will upload the json files to the 632135935563137026 server in the 719903775556370495 channel managed by Zackaree. 
 This primarily serves as a backup for the markup scripts. 
@@ -46,13 +52,14 @@ Provides a list of towns from a server which start with the search criteria.
 This has not been made to look good, simply was needed for quick functionality. 
 
 ```
-.TS [search_criteria] [server] [date] 
+.Ts [search_criteria] [server] [date] 
 ```
 > examples
 >```
-> .TS a Aurora 1.1.23
+> .Ts a Aurora 1.1.23
 > ```
 >
 >```buildoutcfg
 >['a_server', 'aaaaa', 'abidjan', 'african_khazar', 'alhucemas', 'allayoh', 'allayok', 'allium', 'alpha_island', 'alykeriaberg', 'ambonara', 'anchorage', 'anevertos', 'araru', 'aria', 'assassin_cat', 'atlantas', 'awa']
 >```
+
