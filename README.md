@@ -17,11 +17,11 @@ The 14 day limit on gifs is to prevent the bot from reaching the 8MB limit on up
 All commands are case sensitive. This resulted in the need for the TS command. 
 
 ## Known Bugs
-If a town is named Aurora or Nova, they may not be rendered. 
+If a town is named Aurora or Nova, they may not be rendered.  `fixed in flask rewrite`
 
-Bot does not specify if a file cannot be read via an error in the json. 
+Bot does not specify if a file cannot be read via an error in the json.  
 
-`./Dependancies/Download.py` Checks for 502 errors, however recent issues have shown checking for a 404 error may prove benefitial.
+`./Dependancies/Download.py` Checks for 502 errors, however recent issues have shown checking for a 404 error may prove benefitial. `fixed in flask rewrite`
 ## Commands
 ### .TR or .TownRender
 Renders specified town(s) on specified date(s). 
