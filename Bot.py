@@ -1,15 +1,21 @@
 import json
 from discord.ext import commands, tasks
 from PIL import Image, ImageDraw
+import numpy as np
 import traceback
-from Dependancies.Returns import *
+from Dependancies.Min3D import *
+from Dependancies.Max3D import *
 from Dependancies.ImageHandling import *
 from Dependancies.Download import *
 from Dependancies.DiscordEmbed import *
 from Dependancies.DateList import *
 TOKEN = 'DISCORD BOT TOKEN GOES HERE'
 
-client = commands.Bot(command_prefix='.', help_command=None,
+intents = discord.Intents.default()
+intents.message_content = True  # Enable the message_content intent
+
+# Create the client instance with the specified intents
+client = commands.Bot(intents=intents, command_prefix='.', help_command=None,
                       description=None, case_insensitive=True)
 
 #to support running on windows or linux systems
@@ -81,12 +87,12 @@ def TownGif(TownNames, TownDate, Server):
             Dates.append(Date)
     if FillColor == None:
         FillColor = ['#FFFFFF']
-    GifZ = [[[GifZ[j][i][f] - (ThreeDMinimumReturn(GifZ) - 16) for f in range(len(GifZ[j][i]))] for i in range(len(GifZ[j]))] for j in range(len(GifZ))] #gets upper and lower bounds of the towns x and z coordinates over the entire nested array
-    GifX = [[[GifX[j][i][f] - (ThreeDMinimumReturn(GifX) - 16) for f in range(len(GifX[j][i]))] for i in range(len(GifX[j]))] for j in range(len(GifX))]
+    GifZ = [[[GifZ[j][i][f] - (min3d(GifZ) - 16) for f in range(len(GifZ[j][i]))] for i in range(len(GifZ[j]))] for j in range(len(GifZ))] #gets upper and lower bounds of the towns x and z coordinates over the entire nested array
+    GifX = [[[GifX[j][i][f] - (min3d(GifX) - 16) for f in range(len(GifX[j][i]))] for i in range(len(GifX[j]))] for j in range(len(GifX))]
     print(FillColor)
     for i in range(len(GifX)):
         thetuple = [tuple(int(j.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) for j in FillColor]
-        Gif.append(TownRender(GifX[i], GifZ[i], ThreeDMaximumReturn(GifX), ThreeDMaximumReturn(GifZ), Dates[i], thetuple))
+        Gif.append(TownRender(GifX[i], GifZ[i], max3d(GifX), max3d(GifZ), Dates[i], thetuple))
     return Gif
 
 
@@ -106,9 +112,9 @@ async def TR(ctx, *args):
           if TownX == None:
             await ctx.send("``Invalid Date or Town. Town Names are case sensitive. Check towns with Tsearch``")
           else:
-            TownX = [[TownX[j][i] - (MinimumReturn(TownX) - 16) for i in range(len(TownX[j]))] for j in range(len(TownX))] #stupid math to get the upper and lower bounds of the towns x and z coordinates to have a border around the image
-            TownZ = [[TownZ[j][i] - (MinimumReturn(TownZ) - 16) for i in range(len(TownZ[j]))] for j in range(len(TownZ))]
-            TownRender(TownX, TownZ, MaximumReturn(TownX), MaximumReturn(TownZ),TownDate[0],FillColor=[tuple(int(j.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) for j in FillColor]).save(F"{str(getcwd())}/Images/TempRender.png")
+            TownX = [[TownX[j][i] - (min2d(TownX) - 16) for i in range(len(TownX[j]))] for j in range(len(TownX))] #stupid math to get the upper and lower bounds of the towns x and z coordinates to have a border around the image
+            TownZ = [[TownZ[j][i] - (min2d(TownZ) - 16) for i in range(len(TownZ[j]))] for j in range(len(TownZ))]
+            TownRender(TownX, TownZ, max2d(TownX), max2d(TownZ),TownDate[0],FillColor=[tuple(int(j.lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) for j in FillColor]).save(F"{str(getcwd())}/Images/TempRender.png")
             embed, files = DiscordEmbed(TownNames, "png")
             await ctx.send(files=files, embed=embed)
         elif len(TownDate) > 1:
