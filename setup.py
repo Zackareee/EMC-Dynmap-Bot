@@ -11,7 +11,7 @@ setup(
     ],
     packages=find_packages(),
     python_requires=">=3.12",  # Specify minimum Python version
-    install_requires=["numpy", "pandas", "discord.py", "Pillow", "requests"],
+    install_requires=["numpy", "pandas", "discord.py", "Pillow", "requests", "sqlalchemy"],
     extras_require={
         "dev": ["pytest", "mypy", "black"],  # Additional dependencies for development
     },
