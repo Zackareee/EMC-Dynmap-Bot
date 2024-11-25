@@ -1,64 +1,55 @@
-import sqlalchemy
+import sqlalchemy as sa
 import pandas as pd
 
-from typing import Optional
-
-from sqlalchemy import String
+from typing import Optional, List
+from dataclasses import dataclass
+from sqlalchemy import String, Float, LargeBinary
 from sqlalchemy.orm import DeclarativeBase
-from sqlalchemy.orm import Mapped
-from sqlalchemy.orm import mapped_column
+from sqlalchemy import Column, ForeignKey, String, Text, JSON
+from sqlalchemy.orm import declarative_base, relationship
+Base = declarative_base()
+
 
 class Base(DeclarativeBase):
     pass
 
 
 class Town(Base):
-    __tablename__ = "Town"
-    uuid: Mapped[str] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    board: Mapped[str] = mapped_column(String(30))
-    founder: Mapped[str] = mapped_column(String(30))
-    wiki: Mapped[str] = mapped_column(String(30))
-    nation: Mapped[str] = mapped_column(String(30))
-    timestamps: Mapped[str] = mapped_column(String(30))
-    status: Mapped[str] = mapped_column(String(30))
-    stats: Mapped[str] = mapped_column(String(30))
-    perms: Mapped[str] = mapped_column(String(30))
-    coordinates: Mapped[str] = mapped_column(String(30))
-    residents: Mapped[str] = mapped_column(String(30))
-    trusted: Mapped[str] = mapped_column(String(30))
-    outlaws: Mapped[str] = mapped_column(String(30))
-    quarters: Mapped[str] = mapped_column(String(30))
-    ranks: Mapped[str] = mapped_column(String(30))
-    mayor: Mapped[str] = mapped_column(sqlalchemy.ForeignKey("Player.uuid"))  # Correct foreign key
-    mayor_id: Mapped["Player"] = sqlalchemy.orm.relationship("Player", back_populates="towns")
+    __tablename__ = 'town'
 
+    uuid = Column(String, primary_key=True, unique=True, nullable=False)
+    name = Column(String, nullable=False)
+    coordinates = Column(JSON, nullable=False)
+
+    # Relationship to the Player table
+    players = relationship("Player", back_populates="town")
 
 class Player(Base):
-    __tablename__ = "Player"
-    uuid: Mapped[str] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(String(30))
-    title: Mapped[str] = mapped_column(String(30))
-    surname: Mapped[str] = mapped_column(String(30))
-    formattedName: Mapped[str] = mapped_column(String(30))
-    about: Mapped[dict[str,str]] = mapped_column(String(30))
-    timestamps: Mapped[str] = mapped_column(String(30))
-    status: Mapped[str] = mapped_column(String(30))
-    stats: Mapped[str] = mapped_column(String(30))
-    perms: Mapped[str] = mapped_column(String(30))
-    ranks: Mapped[str] = mapped_column(String(30))
-    friends: Mapped[str] = mapped_column(String(30))
-    towns: Mapped[list["Town"]] = sqlalchemy.orm.relationship("Town", back_populates="mayor_id")  # Back-reference
+    __tablename__ = 'player'
+
+    uuid = Column(String, primary_key=True, unique=True, nullable=False)
+    name = Column(String, nullable=False)
+    town_id = Column(String, ForeignKey('town.uuid'))
+
+    # Relationship to the Town table
+    town = relationship("Town", back_populates="players")
 
 
-dbEngine = sqlalchemy.create_engine(r'sqlite:///database.db') # ensure this is the correct path for the sqlite file.
-session = sqlalchemy.orm.Session(dbEngine)
-stmt = sqlalchemy.select(Town)
-result = session.execute(stmt).all()
-for town in result:
-    town = town
+# dbEngine = sa.create_engine(r'sqlite:///database.db') # ensure this is the correct path for the sqlite file.
+# session = sa.orm.Session(dbEngine)
+# stmt = sa.select(Town)
+# result = session.execute(stmt).all()
+# for town in result:
+#     town = town
+#
+# val = pd.read_sql('select * from Town',dbEngine)
+# pass
 
-val = pd.read_sql('select * from Town',dbEngine)
-pass
 
-
+def unpack_town_response(town_json) -> Town:
+    town_obj: Town = Town(
+        name=town_json["name"],
+        uuid=town_json["uuid"],
+        coordinates=town_json["coordinates"]['townBlocks']
+    )
+    return town_obj

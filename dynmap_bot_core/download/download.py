@@ -1,4 +1,4 @@
-__all__ = ["download_json"]
+__all__ = ["download", "download_map_image"]
 
 import requests
 import os
@@ -8,6 +8,10 @@ import pathlib
 
 s: str = "#" if os.name == "nt" else "-"
 
+def download_map_image(x: int, z: int) -> None:
+    download(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png",
+             rf"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\out\images\{x}_{z}.png")
+
 
 def _get_headers() -> dict[str, str]:
     headers: dict[str, str] = {
@@ -16,26 +20,85 @@ def _get_headers() -> dict[str, str]:
     return headers
 
 
-def _get_emc_towny_url() -> str:
-    return "https://map.earthmc.net/tiles/minecraft_overworld/markers.json"
+def download(url, filepath: str) -> bool:
+
+
+    with requests.get(url, stream=True) as r:
+        r.raise_for_status()
+        with open(filepath, 'wb') as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
+    return True
+
+
+
+    #
+    #
+    #
+    # headers: dict[str, str] = _get_headers()
+    #
+    # request_body: requests.Response = requests.get(
+    #     url=url,
+    #     headers=headers,
+    # )
+    #
+    # if b"502: Bad gateway" in request_body.content:
+    #     print("502: Bad gateway")
+    #     return False
+    #
+    # open(file=filepath, mode="w").write(request_body.content)
+    # return True
 
 
 def download_json(url, filepath: str) -> bool:
-    """
-
-    :param server_name:
-    :return:
-    """
     headers: dict[str, str] = _get_headers()
 
-    json_body: requests.Response = requests.get(
+    request_body: requests.Response = requests.get(
         url=url,
         headers=headers,
     )
 
-    if b"502: Bad gateway" in json_body.content:
+    if b"502: Bad gateway" in request_body.content:
         print("502: Bad gateway")
         return False
 
-    open(file=filepath, mode="wb").write(json_body.content)
+    open(file=filepath, mode="wb").write(request_body.content)
     return True
+
+
+# pickle_063 = get_players("9cd95f3e-d22e-4010-9beb-aaa642da38c3")
+# player = orm.Player(
+#     uuid=pickle_063["uuid"],
+#     name=pickle_063["name"],
+#     town_id=pickle_063["town"]["uuid"],
+# )
+# from dynmap_bot_core.models import town as t
+# import sqlalchemy as sa
+# town = get_town(player.town_id)
+# town = orm.Town(
+#     uuid = town["uuid"],
+#     name = town["name"],
+#     coordinates = str(town["coordinates"]),
+# )
+# town = town
+#
+# dbEngine = sa.create_engine(r'sqlite:////Users\zacka\Documents\Projects\EMC-Dynmap-Bot\dynmap_bot_core\orm\database.db') # ensure this is the correct path for the sqlite file.
+# session = sa.orm.Session(dbEngine)
+#
+# session.merge(town)  # Automatically updates if a row with the same primary key exists
+# session.merge(player)
+# session.commit()
+#
+#
+#
+#
+#
+# # for town in result:
+# #     town = town
+# #
+# # val = pd.read_sql('select * from Town',dbEngine)
+# # pass
+#
+#
+# pass
+# pass
