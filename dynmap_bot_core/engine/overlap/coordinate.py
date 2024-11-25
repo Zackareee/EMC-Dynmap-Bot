@@ -36,16 +36,20 @@ def get_min_coordinates_2d(
     return min_x, min_z
 
 
-def normalise_coordinates(
-    coordinates: list[list[coordinate.Coordinate]],
-) -> list[list[coordinate.Coordinate]]:
 
-    min_x, min_z = get_min_coordinates_3d(coordinates)
+def normalise_coordinates(
+    coordinates: list[list[list[int,int]]],
+    min_x,
+    min_z
+) -> list[list[list[int,int]]]:
+    if not min_x and not min_z:
+        min_x, min_z = get_min_coordinates_3d(coordinates)
     for i in coordinates:
         for coord in i:
             coord[0] -= min_x
             coord[1] -= min_z
     return coordinates
+
 
 def get_coordinates(*args: town.Town) -> list[list[coordinate.Coordinate]]:
     return [i.coordinates for i in args]
@@ -57,3 +61,49 @@ def get_image_coordinates(coordinates: list[list[coordinate.Coordinate]]) -> set
         for coord in i:
             image_coordinates.add((math.floor(coord[0]/32),math.floor(coord[1]/32)))
     return list(image_coordinates)
+
+from collections import defaultdict
+
+
+def sort_perimeter_clockwise(perimeter_points):
+    # Calculate the centroid of the points
+    centroid_x = sum(x for x, y in perimeter_points) / len(perimeter_points)
+    centroid_y = sum(y for x, y in perimeter_points) / len(perimeter_points)
+
+    # Sort points by angle relative to the centroid
+    def angle_from_centroid(point):
+        x, y = point
+        return math.atan2(y - centroid_y, x - centroid_x)
+
+    sorted_points = sorted(perimeter_points, key=angle_from_centroid)
+    return sorted_points
+
+
+def calculate_perimeter(town_blocks):
+    # Get the unique points from townBlocks
+    points = set(map(tuple, town_blocks))
+
+    # Define the neighbors relative to any given point
+    directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+    # Store the perimeter as a set of unique edges
+    perimeter_edges = set()
+
+    for x, y in points:
+        for dx, dy in directions:
+            neighbor = (x + dx, y + dy)
+            # If the neighbor is not part of the townBlocks, add the edge to the perimeter
+            if neighbor not in points:
+                edge = tuple(sorted([(x, y), neighbor]))
+                perimeter_edges.add(edge)
+
+    # Extract the perimeter points from the edges
+    perimeter_points = {pt for edge in perimeter_edges for pt in edge}
+
+    # Sort points clockwise
+    sorted_perimeter = sort_perimeter_clockwise(list(perimeter_points))
+    return sorted_perimeter
+
+
+
+
