@@ -2,15 +2,25 @@ __all__ = ["download", "download_map_image"]
 
 import requests
 import os
-from datetime import datetime
-
-import pathlib
+from PIL import Image, ImageDraw
+from io import BytesIO
 
 s: str = "#" if os.name == "nt" else "-"
 
-def download_map_image(x: int, z: int) -> None:
-    download(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png",
-             rf"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\out\images\{x}_{z}.png")
+# def download_map_image(x: int, z: int) -> None:
+#     download(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png",
+#              rf"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\out\images\{x}_{z}.png")
+
+
+def download_map_image(x: int, z: int) -> bytes:
+    with requests.get(
+        f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png"
+    ) as r:
+        r.raise_for_status()
+        # with open(filepath, 'wb') as f:
+        #     for chunk in r.iter_content(chunk_size=8192):
+        #         f.write(chunk)
+        return Image.open(BytesIO(r.content))
 
 
 def _get_headers() -> dict[str, str]:
@@ -22,15 +32,12 @@ def _get_headers() -> dict[str, str]:
 
 def download(url, filepath: str) -> bool:
 
-
     with requests.get(url, stream=True) as r:
         r.raise_for_status()
-        with open(filepath, 'wb') as f:
+        with open(filepath, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
     return True
-
-
 
     #
     #

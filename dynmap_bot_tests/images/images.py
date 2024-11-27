@@ -2,114 +2,68 @@ from dynmap_bot_core.api_hook import common
 from dynmap_bot_core.engine.overlap import coordinate
 from dynmap_bot_core.orm import orm
 from dynmap_bot_core import download as dl
-import os
-from PIL import Image, ImageDraw
-
-#
-#
-
-#     pass
+from dynmap_bot_core.images import image as img
+import PIL
 
 def test_images():
-    vladivostok = orm.unpack_town_response(common.get_town("aomi"))
-    # khogno_khan = orm.unpack_town_response(common.get_town("Khogno_Khan"))
-    coordinates = coordinate.get_coordinates(vladivostok)
+    town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
+    towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
+
+    coordinates = coordinate.get_coordinates(*towns)
     image_coordinates = coordinate.get_image_coordinates(coordinates)
+    image_data = {}
     for i in image_coordinates:
-        dl.download_map_image(i[0], i[1])
+        image_data[(i[0], i[1])] = dl.download_map_image(i[0], i[1])
+
     min_x, min_z = coordinate.get_min_coordinates_2d(image_coordinates)
     min_x *= 32
     min_z *= 32
     offset_coordinates = coordinate.normalise_coordinates(coordinates, min_x, min_z)
-    make_image_collage(offset_coordinates)
+    image: PIL.Image = img.make_image_collage(offset_coordinates, image_data)
+    image.save(r"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\output_collage_with_polygon.png")
 
 
-def make_image_collage(polygon_coords):
-    # Directory containing images
-    image_dir = r"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\out\images"
-    output_file = r"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\output_collage_with_polygon.png"
-
-    # Image dimensions (512x512 px)
-    tile_size = 512
-
-    images = {}
-    for filename in os.listdir(image_dir):
-        if filename.endswith(".png"):
-            coords = parse_coordinates(filename)
-            if coords:
-                images[coords] = os.path.join(image_dir, filename)
-
-    # Determine canvas bounds
-    if not images:
-        print("No valid images found.")
-        exit()
-
-    x_coords = [coord[0] for coord in images.keys()]
-    y_coords = [coord[1] for coord in images.keys()]
-    min_x, max_x = min(x_coords), max(x_coords)
-    min_y, max_y = min(y_coords), max(y_coords)
-
-    # Calculate canvas size
-    canvas_width = (max_x - min_x + 1) * tile_size
-    canvas_height = (max_y - min_y + 1) * tile_size
-
-    # Create a blank canvas with a white background
-    canvas = Image.new("RGBA", (canvas_width, canvas_height), "white")
-
-    # Place images on the canvas
-    for (x, y), filepath in images.items():
-        img = Image.open(filepath)
-        paste_x = (x - min_x) * tile_size
-        paste_y = (y - min_y) * tile_size  # Corrected Y-axis logic
-        canvas.paste(img, (paste_x, paste_y))
-
-    # Draw a filled polygon
-    for i in polygon_coords:
-        i = sorted(i)
-        # i = coordinate.calculate_perimeter(i)
-        res = list(tuple(a*16 for a in sub) for sub in i)
-
-        draw_filled_polygon(canvas, res)
-
-    # canvas.show()
-    # Save the final collage
-    canvas.save(output_file)
+def test_make_square():
+    img.make_square_lines([0,0])
 
 
+def test_perimter_collapsing():
+    town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
+    towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
+
+    coordinates = coordinate.get_coordinates(*towns)
+    image_coordinates = coordinate.get_image_coordinates(coordinates)
+    image_data = {}
+    for i in image_coordinates:
+        image_data[(i[0], i[1])] = dl.download_map_image(i[0], i[1])
+
+    min_x, min_z = coordinate.get_min_coordinates_2d(image_coordinates)
+    max_x, max_z = coordinate.get_min_coordinates_2d(image_coordinates)
 
 
-def parse_coordinates(filename):
-    """Extract coordinates from the filename."""
-    base_name = os.path.splitext(filename)[0]
-    try:
-        x, y = map(int, base_name.split('_'))
-        return x, y
-    except ValueError:
-        return None
+    min_x *= 32
+    min_z *= 32
+    offset_coordinates = coordinate.normalise_coordinates(coordinates, min_x, min_z)
 
+    min_x, min_z = coordinate.get_min_coordinates_3d(offset_coordinates)
+    max_x, max_z = coordinate.get_max_coordinates_3d(offset_coordinates)
 
-def draw_filled_polygon(canvas, points):
-    """
-    Draws a filled polygon on the canvas with transparency.
-    :param canvas: The canvas Image object.
-    :param points: List of (x, y) coordinates for the polygon.
-    """
-    # Create a transparent overlay
-    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))
-    draw = ImageDraw.Draw(overlay)
+    min_x *= 16
+    min_x -= 16
+    min_z *= 16
+    min_z -= 16
+    max_x *= 16
+    max_x += 32
+    max_z *= 16
+    max_z += 32
 
-    # Draw the semi-transparent rectangles on the overlay
-    for i in points:
-        shape = [(i[0], i[1]), (i[0] + 16, i[1] + 16)]
-        draw.rectangle(shape, fill=(255, 0, 0, int(255 * 0.4)))  # 20% transparency
-
-    # Composite the overlay onto the original canvas
-    result = Image.alpha_composite(canvas.convert("RGBA"), overlay)
-
-    # Display the result
-    result.show()
-    # print(f"Collage saved to {output_file}")
-
-# Collect all images with valid coordinates
-
-
+    town_grids = []
+    for town_coordinates in offset_coordinates:
+        town_grids.append(img.a_crude_ass_way_of_collating_perimeters(town_coordinates))
+    image: PIL.Image = img.make_image_collage(image_data)
+    for i in town_grids:
+        image = img.make_grids_on_collage([i], image)
+    image = image.crop((min_x,min_z,max_x,max_z))
+    width, height = image.size
+    image = image.resize((width * 4, height * 4), PIL.Image.NEAREST)
+    image.show()

@@ -4,6 +4,7 @@ import requests
 import json
 from dynmap_bot_core.orm import orm
 
+
 def get_all_towns():
     url: str = "https://api.earthmc.net/v3/aurora/towns"
     x: requests.Response = requests.get(url)
@@ -47,6 +48,7 @@ def get_players(uuid: str) -> dict:
     x: requests.Response = requests.post(url, json={"query": [uuid]})
     player: dict = json.loads(x.text)[0]
     return player
+
 
 # pickle_063 = get_players("9cd95f3e-d22e-4010-9beb-aaa642da38c3")
 # player = orm.Player(
