@@ -27,8 +27,10 @@ def test_make_square():
     img.make_square_lines([0,0])
 
 
-def test_perimter_collapsing():
+def test_perimeter_collapsing():
+    # town_names = ["Cape_Verde"]
     town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
+
     towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
 
     coordinates = coordinate.get_coordinates(*towns)
@@ -57,11 +59,11 @@ def test_perimter_collapsing():
     max_z *= 16
     max_z += 32
 
-    town_grids = []
+    town_polygons = []
     for town_coordinates in offset_coordinates:
-        town_grids.append(img.a_crude_ass_way_of_collating_perimeters(town_coordinates))
+        town_polygons += [img.a_crude_ass_way_of_collating_perimeters(town_coordinates)]
     image: PIL.Image = img.make_image_collage(image_data)
-    for i in town_grids:
+    for i in town_polygons:
         image = img.make_grids_on_collage([i], image)
     image = image.crop((min_x,min_z,max_x,max_z))
     width, height = image.size

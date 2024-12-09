@@ -1,51 +1,12 @@
 import PIL
 import random
+from shapely.geometry import Polygon
+from shapely.ops import unary_union
+
 from dynmap_bot_core.engine.overlap import coordinate
 def get_chunk_size() -> int:
     return 1
 
-# def a_crude_ass_way_of_collating_perimeters(grid_points: list[list[list[int, int]]]):
-#     left = set()
-#     top = set()
-#     right = set()
-#     bottom = set()
-#
-#     for pair in grid_points:
-#         line_dict = make_square_lines(pair)
-#         left.add(line_dict["left"])
-#         right.add(line_dict["right"])
-#         top.add(line_dict["top"])
-#         bottom.add(line_dict["bottom"])
-#
-#     #find duplicates
-#     duplicates_lr: set = left.intersection(right)
-#     duplicates_tb: set = top.intersection(bottom)
-#
-#     unique_lr = (left.union(right)).difference(duplicates_lr)
-#     unique_tb = (top.union(bottom)).difference(duplicates_tb)
-#
-#     perimeter_points = unique_lr.union(unique_tb)
-#     coordinates = set()
-#     for point_pair in perimeter_points:
-#         for coordinate in point_pair:
-#             coordinates.add(coordinate)
-#     return list(coordinates)
-#
-#
-# def make_square_lines(point: list[int,int]) -> dict[str,list[list[int, int]]]:
-#     CHUNKSIZE = get_chunk_size()
-#     x = point[0]
-#     z = point[1]
-#     left = ((x, z), (x+CHUNKSIZE, z))
-#     top = ((x, z), (x, z+CHUNKSIZE))
-#     bottom = ((x+CHUNKSIZE, z), (x+CHUNKSIZE, z+CHUNKSIZE))
-#     right =((x, z+CHUNKSIZE), (x+CHUNKSIZE, z+CHUNKSIZE))
-#     return {
-#         "left": left,
-#         "right": right,
-#         "top": top,
-#         "bottom": bottom
-#     }
 
 def custom_intersection(set_A, set_B):
     # Create a new set for the intersection, only considering exact matches
@@ -70,74 +31,21 @@ def tuple_set_intersection(set_A, set_B):
 
 
 def a_crude_ass_way_of_collating_perimeters(grid_points: list[list[list[int, int]]]):
-    left = set()
-    top = set()
-    right = set()
-    bottom = set()
-
-    for pair in grid_points:
-        line_dict = make_square_lines(pair)
-        left.add(line_dict["left"])
-        right.add(line_dict["right"])
-        top.add(line_dict["top"])
-        bottom.add(line_dict["bottom"])
-
-    #find duplicates
-    duplicates_left: set = tuple_set_intersection(left, right)
-    duplicates_right: set = tuple_set_intersection(right, left)
-    duplicates_top: set = tuple_set_intersection(top, bottom)
-    duplicates_bottom: set = tuple_set_intersection(bottom, top)
-
-    new_left = left.difference(duplicates_left)
-    new_right = right.difference(duplicates_right)
-    new_top = top.difference(duplicates_top)
-    new_bottom = bottom.difference(duplicates_bottom)
-
-    cyclic_list = make_linked_list_of_coordinates(new_left,new_right,new_top,new_bottom)
-    return cyclic_list
-
-def make_linked_list_of_coordinates(left,right,top,bottom):
-    # Start with an arbitrary origin (e.g., from 'left' set)
-    all_sets = {'left': left, 'right': right, 'top': top, 'bottom': bottom}
-    origin = next(iter(left))[0]  # Start with the first origin from the 'left' set
-
-    # Create the linked list of coordinates
-    linked_list = [origin]  # Initialize the linked list with the first origin
-
-    # We will keep track of visited origins to avoid revisiting
-    visited_origins = {origin}
-
-    while len(visited_origins) < len(left) + len(right) + len(top) + len(bottom):
-        found_next = False
-        # Search for the destination in each set
-        for direction, coordinates in all_sets.items():
-            if not found_next:
-                for origin_point, destination_point in coordinates:
-                    if origin_point == origin and destination_point not in visited_origins:
-                        # Add the destination as the next origin
-                        linked_list.append(destination_point)
-                        visited_origins.add(destination_point)
-                        origin = destination_point  # Set new origin
-                        found_next = True
-                        break
-
-    return linked_list
-
-def make_square_lines(point: list[int,int]) -> dict[str,list[list[int, int]]]:
-    CHUNKSIZE = get_chunk_size()
-    x = point[0]
-    z = point[1]
-    top = ((x, z), (x, z+CHUNKSIZE))
-    right =((x, z+CHUNKSIZE), (x+CHUNKSIZE, z+CHUNKSIZE))
-    bottom = ((x+CHUNKSIZE, z+CHUNKSIZE), (x+CHUNKSIZE, z))
-    left = ((x+CHUNKSIZE, z),(x, z))
-
-    return {
-        "left": left,
-        "right": right,
-        "top": top,
-        "bottom": bottom
-    }
+    boundaries = []
+    squares = [Polygon([
+        (x - 0.5, y - 0.5),
+        (x - 0.5, y + 0.5),
+        (x + 0.5, y + 0.5),
+        (x + 0.5, y - 0.5),
+    ]) for x, y in grid_points]
+    merged_polygon = unary_union(squares)
+    if merged_polygon.geom_type == 'MultiPolygon':
+        for i in merged_polygon.geoms:
+            boundaries.append(list(i.exterior.coords))
+    else:
+        boundaries = [list(merged_polygon.exterior.coords)]
+    # Extract the boundary (external edges) of the merged geometry
+    return boundaries
 
 def make_image_collage(images) -> PIL.Image:
     # Directory containing images
@@ -164,6 +72,7 @@ def make_image_collage(images) -> PIL.Image:
     return canvas
 
 def make_grids_on_collage(polygon_coords, canvas) -> PIL.Image:
+    polygon_coords = polygon_coords[0]
     for i in polygon_coords:
         color = (
             random.randint(0, 255),
@@ -173,10 +82,10 @@ def make_grids_on_collage(polygon_coords, canvas) -> PIL.Image:
         )
         res = list(
             tuple(
-                a * 16 for a in sub
+                (a * 16) + 8 for a in sub
             ) for sub in i
         )
-        # res = coordinate.reorder_cyclic_list(res)
+    # res = coordinate.reorder_cyclic_list(res)
 
         canvas = draw_filled_polygon(canvas, res, color)
 
