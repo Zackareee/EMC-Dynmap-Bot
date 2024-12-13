@@ -10,10 +10,8 @@ def test_images():
     towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
 
     coordinates = coordinate.get_coordinates(*towns)
-    image_coordinates = coordinate.get_image_coordinates(coordinates)
-    image_data = {}
-    for i in image_coordinates:
-        image_data[(i[0], i[1])] = dl.download_map_image(i[0], i[1])
+    image_coordinates = coordinate.get_background_image_coordinates(coordinates)
+    image_data = dl.download_map_images_as_dict(image_coordinates)
 
     min_x, min_z = coordinate.get_min_coordinates_2d(image_coordinates)
     min_x *= 32
@@ -32,20 +30,11 @@ def test_perimeter_collapsing():
     town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
 
     towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
-
     coordinates = coordinate.get_coordinates(*towns)
-    image_coordinates = coordinate.get_image_coordinates(coordinates)
-    image_data = {}
-    for i in image_coordinates:
-        image_data[(i[0], i[1])] = dl.download_map_image(i[0], i[1])
-
+    image_coordinates = coordinate.get_background_image_coordinates(coordinates)
+    image_data = dl.download_map_images_as_dict(image_coordinates)
     min_x, min_z = coordinate.get_min_coordinates_2d(image_coordinates)
-    max_x, max_z = coordinate.get_min_coordinates_2d(image_coordinates)
-
-
-    min_x *= 32
-    min_z *= 32
-    offset_coordinates = coordinate.normalise_coordinates(coordinates, min_x, min_z)
+    offset_coordinates = coordinate.normalise_coordinates(coordinates, min_x * 32, min_z * 32)
 
     min_x, min_z = coordinate.get_min_coordinates_3d(offset_coordinates)
     max_x, max_z = coordinate.get_max_coordinates_3d(offset_coordinates)

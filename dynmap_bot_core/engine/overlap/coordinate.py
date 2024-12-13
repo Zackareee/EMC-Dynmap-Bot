@@ -3,7 +3,7 @@ from dynmap_bot_core.api_hook import common
 from dynmap_bot_core.models import town, coordinate
 from dynmap_bot_core.engine.overlap import town as ot
 import math
-
+from dynmap_bot_core.orm import orm
 
 def get_min_coordinates_3d(
     coordinates: list[list[list[int, int]]],
@@ -82,20 +82,19 @@ def normalise_coordinates(
     return coordinates
 
 
-def get_coordinates(*args: town.Town) -> list[list[coordinate.Coordinate]]:
+def get_coordinates(*args: orm.Town) -> list[list[int, int]]:
     return [i.coordinates for i in args]
 
 
-def get_image_coordinates(
-    coordinates: list[list[coordinate.Coordinate]],
-) -> set[list[coordinate.Coordinate]]:
-    image_coordinates: set[list[coordinate.Coordinate]] = set()
+def get_background_image_coordinates(
+    coordinates: list[list[int, int]],
+) -> list[tuple[int, int]]:
+    image_coordinates: set[tuple[int,int]] = set()
 
     for i in coordinates:
-        for coord in i:
-            image_coordinates.add(
-                (math.floor(coord[0] / 32), math.floor(coord[1] / 32))
-            )
+        for x, z in i:
+            image_coordinates.add((math.floor(x/32), math.floor(z/32)))
+
     return list(image_coordinates)
 
 

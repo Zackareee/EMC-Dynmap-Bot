@@ -1,16 +1,22 @@
-__all__ = ["download", "download_map_image"]
+__all__ = ["download", "download_map_image", "download_map_images_as_dict"]
 
 import requests
 import os
 from PIL import Image, ImageDraw
 from io import BytesIO
-
+import math
 s: str = "#" if os.name == "nt" else "-"
 
 # def download_map_image(x: int, z: int) -> None:
 #     download(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png",
 #              rf"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\out\images\{x}_{z}.png")
 
+def download_map_images_as_dict(blocks: list[tuple[int,int]]):
+    images = {}
+    for x, z in blocks:
+        if (x, z) not in images.keys():
+            images[(x, z)] = download_map_image(x, z)
+    return images
 
 def download_map_image(x: int, z: int) -> bytes:
     with requests.get(
