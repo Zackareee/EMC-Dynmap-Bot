@@ -3,14 +3,13 @@ import random
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
-
-def a_crude_ass_way_of_collating_perimeters(grid_points: list[list[list[int, int]]]):
+def a_crude_ass_way_of_collating_perimeters(grid_points: list[list[int, int]]):
     boundaries = []
     squares = [Polygon([
-        (x - 0.5, y - 0.5),
-        (x - 0.5, y + 0.5),
-        (x + 0.5, y + 0.5),
-        (x + 0.5, y - 0.5),
+        (x - 8, y - 8),
+        (x - 8, y + 8),
+        (x + 8, y + 8),
+        (x + 8, y - 8),
     ]) for x, y in grid_points]
     merged_polygon = unary_union(squares)
     if merged_polygon.geom_type == 'MultiPolygon':
@@ -54,12 +53,7 @@ def make_grids_on_collage(polygon_coords, canvas) -> PIL.Image:
             random.randint(0, 255),
             int(255 * 0.5),
         )
-        res = list(
-            tuple(
-                (a * 16) + 8 for a in sub
-            ) for sub in i
-        )
-    # res = coordinate.reorder_cyclic_list(res)
+        res = list(tuple(a for a in sub) for sub in i)
 
         canvas = draw_filled_polygon(canvas, res, color)
 
@@ -81,3 +75,4 @@ def draw_filled_polygon(canvas, points, color):
 
     # Composite the overlay onto the original canvas
     return PIL.Image.alpha_composite(canvas.convert("RGBA"), overlay)
+

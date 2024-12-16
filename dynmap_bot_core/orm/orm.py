@@ -36,7 +36,9 @@ class Player(Base):
     # Relationship to the Town table
     town = relationship("Town", back_populates="players")
 
-
+@dataclass
+class TownCoordinates:
+    coordinates: list[list[int,int]]
 # dbEngine = sa.create_engine(r'sqlite:///database.db') # ensure this is the correct path for the sqlite file.
 # session = sa.orm.Session(dbEngine)
 # stmt = sa.select(Town)
