@@ -90,12 +90,12 @@ def get_regions_from_chunks(town_: orm.TownCoordinates):
         )
     return list(regions)
 
-def towns_to_polygons(towns_: orm.TownCoordinates):
+def towns_to_polygons(towns_: orm.TownCoordinates, regions_: list[tuple[int]]):
     all_chunks = [i.coordinates for i in towns_]
     flattened_coordinates = list(
         chain.from_iterable(item if isinstance(item, list) else [item] for item in all_chunks)
     )
-    minx, minz = get_min_coordinates_2d(flattened_coordinates)
+    minx, minz = get_min_coordinates_2d([[x * 32, z * 32] for x, z in regions_])
     normalised_town_chunks = [normalise_coordinates(i, minx, minz) for i in all_chunks]
     multiplied_town_chunks = [multiply_coordinates(i, 16) for i in normalised_town_chunks]
     town_polygs = [img.a_crude_ass_way_of_collating_perimeters(i) for i in multiplied_town_chunks]

@@ -26,18 +26,13 @@ def test_make_square():
 
 
 def test_perimeter_collapsing():
-    town_names = ["Cape_Verde"]
-    # town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
+    # town_names = ["Cape_Verde"]
+    town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
 
     towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
-
-
-
     town_chunks = [coordinate.get_chunks(town) for town in towns]
     town_regions = [region for town in town_chunks for region in coordinate.get_regions_from_chunks(town)]
-
-    town_polygons = coordinate.towns_to_polygons(town_chunks)
-
+    town_polygons = coordinate.towns_to_polygons(town_chunks, town_regions)
     image_data = dl.download_map_images_as_dict(town_regions)
     image: PIL.Image = img.make_image_collage(image_data)
 

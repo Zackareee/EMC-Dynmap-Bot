@@ -53,7 +53,7 @@ def make_grids_on_collage(polygon_coords, canvas) -> PIL.Image:
             random.randint(0, 255),
             int(255 * 0.5),
         )
-        res = list(tuple(a for a in sub) for sub in i)
+        res = list(tuple(a + 8 for a in sub) for sub in i)
 
         canvas = draw_filled_polygon(canvas, res, color)
 
