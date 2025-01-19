@@ -42,3 +42,40 @@ def test_perimeter_collapsing():
     width, height = image.size
     image = image.resize((width * 4, height * 4), PIL.Image.NEAREST)
     image.show()
+
+
+def test_coordinate():
+    # town_names = ["Cape_Verde"]
+    c = coordinate.Chunk(1,32,1)
+    t = coordinate.Town([c])
+    b = coordinate.Chunk(3,32,3)
+    t2 = coordinate.Town([b])
+    m = coordinate.Map([t,t2])
+    map = m.get_offset_map(8,8)
+
+
+def test_coordinates_with_map():
+    # town_names = ["Cape_Verde"]
+    town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
+
+    towns = [orm.unpack_town_coordinates(common.get_town(town)) for town in town_names]
+    new_towns = []
+    for town in towns:
+        town_obj = coordinate.Town([coordinate.Chunk(x, 0, z) for x, z in town[0]])
+        new_towns.append(town_obj)
+    map = coordinate.Map(new_towns)
+    map_multipolygon = map.get_offset_map(8,8)
+
+    map_regions = map.get_regions()
+    image_data = dl.download_map_images_as_dict(map_regions)
+
+    image: PIL.Image = img.make_image_collage(image_data)
+    # image = img.make_grids_on_collage(map_multipolygon, image)
+
+    for map_polygon in map_multipolygon:
+        image = img.make_grids_on_collage(map_polygon, image)
+
+    width, height = image.size
+    image = image.resize((width * 4, height * 4), PIL.Image.NEAREST)
+    image.show()
+

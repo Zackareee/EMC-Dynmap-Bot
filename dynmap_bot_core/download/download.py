@@ -46,19 +46,3 @@ def download(url, filepath: str) -> bool:
             for chunk in r.iter_content(chunk_size=8192):
                 f.write(chunk)
     return True
-
-def download_json(url, filepath: str) -> bool:
-    headers: dict[str, str] = _get_headers()
-
-    request_body: requests.Response = requests.get(
-        url=url,
-        headers=headers,
-    )
-
-    if b"502: Bad gateway" in request_body.content:
-        print("502: Bad gateway")
-        return False
-
-    open(file=filepath, mode="wb").write(request_body.content)
-    return True
-

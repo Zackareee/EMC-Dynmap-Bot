@@ -39,15 +39,10 @@ class Player(Base):
 @dataclass
 class TownCoordinates:
     coordinates: list[list[int,int]]
-# dbEngine = sa.create_engine(r'sqlite:///database.db') # ensure this is the correct path for the sqlite file.
-# session = sa.orm.Session(dbEngine)
-# stmt = sa.select(Town)
-# result = session.execute(stmt).all()
-# for town in result:
-#     town = town
-#
-# val = pd.read_sql('select * from Town',dbEngine)
-# pass
+
+def unpack_town_coordinates(town_json) -> [float]:
+    coordinates = town_json["coordinates"]["townBlocks"],
+    return coordinates
 
 
 def unpack_town_response(town_json) -> Town:

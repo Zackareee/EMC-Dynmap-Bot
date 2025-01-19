@@ -44,18 +44,20 @@ def make_image_collage(images) -> PIL.Image:
         canvas.paste(img, (paste_x, paste_y))
     return canvas
 
-def make_grids_on_collage(polygon_coords, canvas) -> PIL.Image:
-    polygon_coords = polygon_coords[0]
-    for i in polygon_coords:
-        color = (
-            random.randint(0, 255),
-            random.randint(0, 255),
-            random.randint(0, 255),
-            int(255 * 0.5),
-        )
-        res = list(tuple(a + 8 for a in sub) for sub in i)
+def make_grids_on_collage(polygon, canvas) -> PIL.Image:
 
-        canvas = draw_filled_polygon(canvas, res, color)
+    polygon_coords = [[int(x), int(z)] for x, z in polygon.exterior.coords]
+
+    color = (
+        random.randint(0, 255),
+        random.randint(0, 255),
+        random.randint(0, 255),
+        int(255 * 0.5),
+    )
+
+    res = list(tuple(a + 8 for a in sub) for sub in polygon_coords)
+
+    canvas = draw_filled_polygon(canvas, res, color)
 
     return canvas
 
