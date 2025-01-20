@@ -5,19 +5,18 @@ import os
 from PIL import Image, ImageDraw
 from io import BytesIO
 import math
+from dynmap_bot_core.engine.overlap import coordinate
 s: str = "#" if os.name == "nt" else "-"
 
 # def download_map_image(x: int, z: int) -> None:
 #     download(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png",
 #              rf"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\out\images\{x}_{z}.png")
 
-def download_map_images_as_dict(blocks: list[tuple[int,int]]):
+def download_map_images_as_dict(blocks: list[coordinate.Coordinate]):
     images = {}
-    for x, z in blocks:
-        x = math.floor(x)
-        z = math.floor(z)
-        if (x, z) not in images.keys():
-            images[(x, z)] = download_map_image(x, z)
+    for coord in blocks:
+        if (coord.x, coord.z) not in images.keys():
+            images[(coord.x, coord.z)] = download_map_image(int(coord.x), int(coord.z))
     return images
 
 def download_map_image(x: int, z: int) -> bytes:

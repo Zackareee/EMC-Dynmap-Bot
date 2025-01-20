@@ -3,23 +3,6 @@ import random
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
-def a_crude_ass_way_of_collating_perimeters(grid_points: list[list[int, int]]):
-    boundaries = []
-    squares = [Polygon([
-        (x - 8, y - 8),
-        (x - 8, y + 8),
-        (x + 8, y + 8),
-        (x + 8, y - 8),
-    ]) for x, y in grid_points]
-    merged_polygon = unary_union(squares)
-    if merged_polygon.geom_type == 'MultiPolygon':
-        for i in merged_polygon.geoms:
-            boundaries.append(list(i.exterior.coords))
-    else:
-        boundaries = [list(merged_polygon.exterior.coords)]
-    # Extract the boundary (external edges) of the merged geometry
-    return boundaries
-
 def make_image_collage(images) -> PIL.Image:
     # Directory containing images
     TILESIZE = 512

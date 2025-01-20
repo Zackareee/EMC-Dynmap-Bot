@@ -1,13 +1,8 @@
-__all__ = ["multiply_coordinates"]
-
-from itertools import chain
 import math
-from dynmap_bot_core.orm import orm
-from shapely.geometry.base import BaseGeometry
-from dynmap_bot_core.images import image as img
+from collections import namedtuple
 from shapely.geometry import Polygon, MultiPolygon
 from shapely.ops import unary_union
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 def ensure_multipolygon(geometry):
@@ -28,171 +23,166 @@ class Location(ABC):
         self.y: float = y
         self.z: float = z
 
-    def get_coordinates(self):
-        pass
+    def __eq__(self, other):
+        if not isinstance(other, Location):
+            return NotImplemented
+        return self.x == other.x and self.y == other.y and self.z == other.z
 
-    def get_chunk(self) -> [int]:
-        pass
+    def __hash__(self):
+        return hash((self.x, self.y, self.z))
 
-    def get_region(self) -> [int]:
-        pass
+    def get_world_coordinate(self) -> "Coordinate":
+        return Coordinate(math.floor(self.x / 16), self.y, math.floor(self.z / 16))
+
+    def get_chunk_coordinate(self) -> "Coordinate":
+        return Coordinate(math.floor(self.x / 16), self.y, math.floor(self.z / 16))
+
+    def get_region_coordinate(self) -> "Coordinate":
+        return Coordinate(math.floor(self.x / 512), self.y, math.floor(self.z / 512))
+
 
 class Coordinate(Location):
-    def get_coordinates(self) -> [float]:
-        return [self.x, self.y, self.z]
+    def __init__(self, x, y, z):
+        super().__init__(x, y, z)
 
-    def get_chunk(self) -> [int]:
-        return [round(self.x / 16), round(self.z / 16)]
-
-    def get_region(self) -> [int]:
-        return [round(self.x / 512), round(self.z / 512)]
 
 class Chunk(Location):
-    def get_coordinates(self) -> [float]:
-        return [self.x * 16, self.y, self.z * 16]
+    SIZE = 16
 
-    def get_chunk(self) -> [int]:
-        return [self.x, self.z]
-
-    def get_region(self) -> [int]:
-        return [round(self.x / 32), round(self.z / 32)]
+    def __init__(self, x, y, z):
+        # The bottom right of a chunk
+        # IE its max coordinate
+        super().__init__(x * 16, y, z * 16)
 
 
 class Town:
-    def __init__(self, coordinates):
-        self.coordinates: [Coordinate] = coordinates
+    def __init__(self, chunks):
+        self.chunks: [Chunk] = chunks
 
-    def get_town(self):
-        squares: [Polygon] = []
-        for coordinate in self.coordinates:
-            x, y, z = coordinate.get_coordinates()
-            squares.append(Polygon([
-            (x - 8, z - 8),
-            (x - 8, z + 8),
-            (x + 8, z + 8),
-            (x + 8, z - 8),
-        ]))
-        merged_polygon = unary_union(squares)
-        return merged_polygon
+    def get_polygon_top_left_corner(self):
+        padding = Chunk.SIZE
+        return Coordinate(
+            x=min(c.x for c in self.chunks) - padding,
+            y=0,
+            z=min(c.z for c in self.chunks) - padding,
+        )
 
-    def get_regions(self) -> list[int, int]:
-        regions = set()
-        for coordinate in self.coordinates:
-            regions.add(tuple(coordinate.get_region()))
-        return list(regions)
+    def get_polygon_bottom_right_corner(self):
+        return Coordinate(
+            x=max(c.x for c in self.chunks), y=0, z=max(c.z for c in self.chunks)
+        )
+
+    def as_polygon(self):
+        padding = Chunk.SIZE / 2
+        unary_polygon = unary_union(
+            [
+                Polygon(
+                    [
+                        (c.x - padding, c.z - padding),
+                        (c.x - padding, c.z + padding),
+                        (c.x + padding, c.z + padding),
+                        (c.x + padding, c.z - padding),
+                    ]
+                )
+                for c in self.chunks
+            ]
+        )
+        return ensure_multipolygon(unary_polygon)
+
+    def get_regions(self):
+        # To account for regions that are non-rectangular shaped,
+        # dedupe all the regions for all included chunks.
+        return set(chunk.get_region_coordinate() for chunk in self.chunks)
+
 
 class Map:
+    """
+    A map is a collection of Towns.
+    """
+
     def __init__(self, towns):
         self.towns: [Town] = towns
 
-    def get_map(self) -> [Polygon]:
-        polygons = [i.get_town() for i in self.towns]
-        return polygons
+    def get_polygon_top_left_corner(self):
+        return Coordinate(
+            x=min(t.get_polygon_top_left_corner().x for t in self.towns),
+            y=0,
+            z=min(t.get_polygon_top_left_corner().z for t in self.towns),
+        )
 
-    def get_normalized_map(self):
-        merged_map = unary_union(self.get_map())
-        multipolygon: MultiPolygon = ensure_multipolygon(merged_map)
-        min_x = min(coord[0] for polygon in multipolygon.geoms for coord in polygon.exterior.coords) * -1
-        min_z = min(coord[1] for polygon in multipolygon.geoms for coord in polygon.exterior.coords) * -1
+    def get_polygon_bottom_right_corner(self):
+        return Coordinate(
+            x=max(t.get_polygon_bottom_right_corner().x for t in self.towns),
+            y=0,
+            z=max(t.get_polygon_bottom_right_corner().z for t in self.towns),
+        )
 
-        normalised_polygon = []
-        for town in self.get_map():
-            town = Polygon([(x + min_x, y + min_z) for x, y in town.exterior.coords])
-            normalised_polygon.append(town)
+    def get_town_polygons(self, normalised=False, offset_x=0, offset_y=0) -> [Polygon]:
+        """
+        Returns the polygons for each town.
 
-        return normalised_polygon
+        If normalised is set to True, the polygons are coordinates are offset to positive integers only, as
+        the polygon drawing library does not support negative coordinates.
+        :return:
+        """
+        polygons = [polygon for multi_polygon in self.towns for polygon in multi_polygon.as_polygon().geoms]
+
+        if not normalised:
+            return polygons
+
+        if normalised:
+            offset_x -= self.get_polygon_top_left_corner().x
+            offset_y -= self.get_polygon_top_left_corner().z
+
+        return [offset_polygon(offset_x, offset_y, p) for p in polygons]
 
     def get_offset_map(self, offset_x, offset_z):
-        normalized_map = self.get_normalized_map()
-        offset_map = []
-        for town in normalized_map:
-            town = Polygon([(x + offset_x, y + offset_z) for x, y in town.exterior.coords])
-            offset_map.append(town)
+        return self.get_town_polygons(True, offset_x, offset_z)
 
-        return offset_map
+    def get_region_offset(self):
+        """gets the maps offset from the nearest region border"""
+        minimum_coordinate = self.get_polygon_top_left_corner()
+        x_offset = minimum_coordinate.x % 512
+        z_offset = minimum_coordinate.z % 512
+        return [x_offset, z_offset]
 
-    def get_regions(self) -> [[int,int]]:
+
+    def get_regions(self) -> [[int, int]]:
         regions = set()
         for town in self.towns:
             [regions.add(i) for i in town.get_regions()]
         return list(regions)
 
-# def a_crude_ass_way_of_collating_perimeters(grid_points: list[list[int, int]]):
-#     boundaries = []
-#     squares = [Polygon([
-#         (x - 8, y - 8),
-#         (x - 8, y + 8),
-#         (x + 8, y + 8),
-#         (x + 8, y - 8),
-#     ]) for x, y in grid_points]
-#     merged_polygon = unary_union(squares)
-#     if merged_polygon.geom_type == 'MultiPolygon':
-#         for i in merged_polygon.geoms:
-#             boundaries.append(list(i.exterior.coords))
-#     else:
-#         boundaries = [list(merged_polygon.exterior.coords)]
-#     # Extract the boundary (external edges) of the merged geometry
-#     return boundaries
 
 
-
-def get_min_coordinates_3d(
-    coordinates: list[list[list[int, int]]],
-) -> tuple[int, int]:
-
-    x_set: set = set()
-    z_set: set = set()
-    for coord in coordinates:
-        x_set.add(coord[0])
-        z_set.add(coord[1])
-
-    min_x = min(x_set)
-    min_z = min(z_set)
-
-    return min_x, min_z
-
-def get_min_coordinates_2d(
-    coordinates: list[list[int, int]],
-) -> tuple[int, int]:
-
-    x_set: set = set()
-    z_set: set = set()
-    for coord in coordinates:
-        x_set.add(coord[0])
-        z_set.add(coord[1])
-
-    min_x = min(x_set)
-    min_z = min(z_set)
-
-    return min_x, min_z
-
-def normalise_coordinates(coordinates: list[list[int]], min_x, min_z ) -> list[list[int]]:
-    return [[x - min_x, z - min_z] for x, z in coordinates]
-
-def multiply_coordinates(coordinates: list[list[int]], factor: int = 16 ) -> list[list[int]]:
-    return [[x * factor, z * factor] for x, z in coordinates]
+# Coordinate = namedtuple('Coordinate', ['x', 'y', 'z'])
 
 
-def get_chunks(*args: orm.Town) -> orm.TownCoordinates:
-    coords = [i.coordinates for i in args]
-    return orm.TownCoordinates(coords[0])
+def offset_polygon(offset_x, offset_y, polygon):
+    return Polygon([(x + offset_x, y + offset_y) for x, y in polygon.exterior.coords])
 
-def get_regions_from_chunks(town_: orm.TownCoordinates):
-    regions = set()
-    for x, z in town_.coordinates:
-        regions.add(
-            (math.floor(x/32),math.floor(z/32))
-        )
-    return list(regions)
 
-def towns_to_polygons(towns_: orm.TownCoordinates, regions_: list[tuple[int]]):
-    all_chunks = [i.coordinates for i in towns_]
-    flattened_coordinates = list(
-        chain.from_iterable(item if isinstance(item, list) else [item] for item in all_chunks)
-    )
-    minx, minz = get_min_coordinates_2d([[x * 32, z * 32] for x, z in regions_])
-    normalised_town_chunks = [normalise_coordinates(i, minx, minz) for i in all_chunks]
-    multiplied_town_chunks = [multiply_coordinates(i, 16) for i in normalised_town_chunks]
-    town_polygs = [img.a_crude_ass_way_of_collating_perimeters(i) for i in multiplied_town_chunks]
-    return town_polygs
+# class Cell(ABC):
+#     """
+#     A unit of space in Minecraft of at least one coordinate.
+#     Represented using the centre, width and height of the cell, as seen from above.
+#     """
+#     def __init__(self, centre: Coordinate, width, height):
+#         self.centre = centre
+#         self.width = width
+#         self.height = height
+#
+# class Region(Cell):
+#     def __init__(self, centre):
+#         super().__init__(centre, 512, 512)
+#
+# class Chunk(Cell):
+#     def __init__(self, centre):
+#         super().__init__(centre, 16, 16)
+#
+#     def get_region(self) -> Region:
+#         """
+#         Returns the region this chunk is a part of.
+#         """
+#         return Region(Coordinate(math.floor(self.centre.x / 32), 0, math.floor(self.centre.z / 32)))
 
