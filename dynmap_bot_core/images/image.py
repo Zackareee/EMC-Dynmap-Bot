@@ -3,6 +3,7 @@ import random
 from shapely.geometry import Polygon
 from shapely.ops import unary_union
 
+
 def make_image_collage(images) -> PIL.Image:
     # Directory containing images
     TILESIZE = 512
@@ -17,7 +18,9 @@ def make_image_collage(images) -> PIL.Image:
     canvas_height = (max_z - min_z + 1) * TILESIZE
 
     # Create a blank canvas with a white background
-    canvas = PIL.Image.new(mode="RGBA", size=(canvas_width, canvas_height), color="white")
+    canvas = PIL.Image.new(
+        mode="RGBA", size=(canvas_width, canvas_height), color="white"
+    )
 
     # Place images on the canvas
 
@@ -26,6 +29,7 @@ def make_image_collage(images) -> PIL.Image:
         paste_y = (y - min_z) * TILESIZE  # Corrected Y-axis logic
         canvas.paste(img, (paste_x, paste_y))
     return canvas
+
 
 def make_grids_on_collage(polygon, canvas) -> PIL.Image:
 
@@ -60,4 +64,3 @@ def draw_filled_polygon(canvas, points, color):
 
     # Composite the overlay onto the original canvas
     return PIL.Image.alpha_composite(canvas.convert("RGBA"), overlay)
-

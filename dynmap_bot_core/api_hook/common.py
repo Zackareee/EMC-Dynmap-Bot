@@ -36,7 +36,7 @@ def get_all_quaters():
     download.download_json(url=url, filepath=filepath)
 
 
-def get_town(name: str) -> dict:
+def download_town(name: str) -> dict:
     url: str = "https://api.earthmc.net/v3/aurora/towns"
     x: requests.Response = requests.post(url, json={"query": [name]})
     town: dict = json.loads(x.text)[0]

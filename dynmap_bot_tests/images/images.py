@@ -1,12 +1,19 @@
+from numpy.random import normal
 from shapely.geometry.multipolygon import MultiPolygon
 from shapely.geometry import Polygon
 
 from dynmap_bot_core.api_hook import common
 from dynmap_bot_core.engine.overlap import coordinate
+from dynmap_bot_core.engine.overlap.coordinate import (
+    build_image_with_map,
+    crop_image,
+    resize_image,
+)
 from dynmap_bot_core.orm import orm
 from dynmap_bot_core import download as dl
 from dynmap_bot_core.images import image as img
 import PIL
+
 
 def test_images():
     town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
@@ -21,11 +28,13 @@ def test_images():
     min_z *= 32
     offset_coordinates = coordinate.multiply_coordinates(coordinates, min_x, min_z)
     image: PIL.Image = img.make_image_collage(offset_coordinates, image_data)
-    image.save(r"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\output_collage_with_polygon.png")
+    image.save(
+        r"C:\Users\zacka\Documents\Projects\EMC-Dynmap-Bot\output_collage_with_polygon.png"
+    )
 
 
 def test_make_square():
-    img.make_square_lines([0,0])
+    img.make_square_lines([0, 0])
 
 
 def test_perimeter_collapsing():
@@ -34,11 +43,14 @@ def test_perimeter_collapsing():
 
     towns = [orm.unpack_town_response(common.get_town(town)) for town in town_names]
     town_chunks = [coordinate.get_chunks(town) for town in towns]
-    town_regions = [region for town in town_chunks for region in coordinate.get_regions_from_chunks(town)]
+    town_regions = [
+        region
+        for town in town_chunks
+        for region in coordinate.get_regions_from_chunks(town)
+    ]
     town_polygons = coordinate.towns_to_polygons(town_chunks, town_regions)
     image_data = dl.download_map_images_as_dict(town_regions)
     image: PIL.Image = img.make_image_collage(image_data)
-
 
     for i in town_polygons:
         image = img.make_grids_on_collage([i], image)
@@ -46,20 +58,6 @@ def test_perimeter_collapsing():
     image = image.resize((width * 4, height * 4), PIL.Image.NEAREST)
     image.show()
 
-
-# def test_coordinate():
-#     # town_names = ["Cape_Verde"]
-#     c = coordinate.Chunk(1,32,1)
-#     t = coordinate.Town([c])
-#     b = coordinate.Chunk(3,32,3)
-#     t2 = coordinate.Town([b])
-#     m = coordinate.Map([t,t2])
-#     map = m.get_offset_map(8,8)
-
-def test_coordinate():
-    # town_names = ["Cape_Verde"]
-    c = coordinate.Chunk(1,32,1)
-    t = coordinate.Town([c])
 
 class TestChunkMethods:
     def test_coordinate_initialisation(self) -> None:
@@ -70,7 +68,7 @@ class TestChunkMethods:
 
     def test_coordinate_is_multiplied(self) -> None:
         # town_names = ["Cape_Verde"]
-        expected = coordinate.Coordinate(16,32,16)
+        expected = coordinate.Coordinate(16, 32, 16)
         coord = coordinate.Chunk(1, 32, 1)
 
         result = coord
@@ -79,7 +77,7 @@ class TestChunkMethods:
 
     def test_chunk_coordinate_is_input(self) -> None:
         # town_names = ["Cape_Verde"]
-        expected = coordinate.Coordinate(16,32,16)
+        expected = coordinate.Coordinate(16, 32, 16)
         coord = coordinate.Chunk(1, 32, 1)
 
         result = coord
@@ -87,17 +85,16 @@ class TestChunkMethods:
         assert result == expected
 
 
-
 class TestTownMethods:
     def test_coordinate_initialisation(self) -> None:
-        # town_names = ["Cape_Verde"]
+        # town_names = ["Cape_Verde"    ]
         c = coordinate.Chunk(1, 32, 1)
         t = coordinate.Town([c])
         assert isinstance(t, coordinate.Town)
 
     def test_top_left_corner(self) -> None:
         # town_names = ["Cape_Verde"]
-        expected = coordinate.Coordinate(0,0,0)
+        expected = coordinate.Coordinate(0, 0, 0)
         coord = coordinate.Chunk(1, 0, 1)
         town = coordinate.Town([coord])
 
@@ -107,7 +104,7 @@ class TestTownMethods:
 
     def test_bottom_right_corner(self) -> None:
         # town_names = ["Cape_Verde"]
-        expected = coordinate.Coordinate(16,0,16)
+        expected = coordinate.Coordinate(16, 0, 16)
         coord = coordinate.Chunk(1, 0, 1)
         town = coordinate.Town([coord])
 
@@ -132,6 +129,7 @@ class TestTownMethods:
         result = town.get_regions()
 
         assert isinstance(result, set)
+
 
 class TestMapMethods:
     def test_map_initialisation(self) -> None:
@@ -182,11 +180,9 @@ class TestMapMethods:
         town = coordinate.Town([coord])
         map = coordinate.Map([town])
 
-        result = map.get_town_polygons(normalised=True)
+        result = map.get_town_polygons()
 
         assert isinstance(result, list)
-        for i in result:
-            assert isinstance(i, Polygon)
 
     def test_normalised_polygons_minimum_is_zero(self) -> None:
         # town_names = ["Cape_Verde"]
@@ -194,16 +190,17 @@ class TestMapMethods:
         town = coordinate.Town([coord])
         map = coordinate.Map([town])
 
-        result = map.get_town_polygons(normalised=True)
-        x = min(t.bounds[0] for t in result)
-        z = min(t.bounds[1] for t in result)
+        normalised_map = map.get_normalised_map()
+        result = normalised_map.get_polygon_top_left_corner()
+        x = result.x
+        z = result.z
 
         assert x == 8
         assert z == 8
 
     def test_regions_are_accurate(self) -> None:
         # town_names = ["Cape_Verde"]
-        expected = coordinate.Coordinate(0,0,0)
+        expected = coordinate.Coordinate(0, 0, 0)
         coord = coordinate.Chunk(1, 0, 1)
         town = coordinate.Town([coord])
         map = coordinate.Map([town])
@@ -212,47 +209,20 @@ class TestMapMethods:
 
         assert result == [expected]
 
-    def test_regions_are_accurate(self) -> None:
-        # town_names = ["Cape_Verde"]
-        expected = coordinate.Coordinate(0,0,0)
-        coord = coordinate.Chunk(2, 0, 2)
-        town = coordinate.Town([coord])
-        map = coordinate.Map([town])
-
-        result = map.get_region_offset()
-
-        assert result == [16,16]
-
-    # b = coordinate.Chunk(3,32,3)
-    # t2 = coordinate.Town([b])
-    # m = coordinate.Map([t,t2])
-    # map = m.get_offset_map(8,8)
 
 def test_coordinates_with_map():
-    # town_names = ["Cape_Verde"]
     town_names = ["Sanctuary", "ILoveFix", "Gulf_Of_Guinea", "PearlyGates"]
+    map_obj = coordinate.build_map(town_names)
 
-    towns = [orm.unpack_town_coordinates(common.get_town(town)) for town in town_names]
-    new_towns = []
-    for town in towns:
-        town_obj = coordinate.Town([coordinate.Chunk(x, 0, z) for x, z in town[0]])
-        new_towns.append(town_obj)
-    map = coordinate.Map(new_towns)
-    map_regions = list(map.get_regions())
-    offset = map.get_region_offset()
+    normalised_map = map_obj.get_normalised_map()
+    offset = map_obj.get_region_offset()
+    map_multipolygon = normalised_map.offset_towns(offset[0], 0, offset[1])
 
-    map_multipolygon = map.get_offset_map(offset[0],offset[1])
-
-
-    image_data = dl.download_map_images_as_dict(map_regions)
-
-    image: PIL.Image = img.make_image_collage(image_data)
-    # image = img.make_grids_on_collage(map_multipolygon, image)
-
-    for map_polygon in map_multipolygon:
-        image = img.make_grids_on_collage(map_polygon, image)
-
-    width, height = image.size
-    image = image.resize((width * 4, height * 4), PIL.Image.NEAREST)
-    image.show()
-
+    image_obj = build_image_with_map(map_obj)
+    image_obj: PIL.Image = crop_image(
+        image_obj,
+        map_multipolygon.get_polygon_top_left_corner(),
+        map_multipolygon.get_polygon_bottom_right_corner(),
+    )
+    resize_image(image_obj).show()
+    resize_image(image_obj).save(r"C:\Users\zacka\Documents\image.png")

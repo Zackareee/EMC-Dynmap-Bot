@@ -21,7 +21,7 @@ class Town(Base):
 
 
 def unpack_town_coordinates(town_json) -> [float]:
-    coordinates = town_json["coordinates"]["townBlocks"],
+    coordinates = (town_json["coordinates"]["townBlocks"],)
     return coordinates
 
 
