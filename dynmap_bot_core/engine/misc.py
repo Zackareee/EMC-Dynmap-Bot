@@ -36,7 +36,8 @@ def build_map(town_names: list[str]) -> Map:
     :param town_names:
     :return:
     """
-    return Map([build_town(town) for town in town_names])
+    towns = [build_town(town) for town in town_names]
+    return Map(towns)
 
 
 def build_image_with_map(map_obj: Map) -> Image:
@@ -47,13 +48,10 @@ def build_image_with_map(map_obj: Map) -> Image:
     :return: an Image object with the polygon overlayed ontop of the background
     """
     map_regions: list[Coordinate] = list(map_obj.get_regions())
-
     normalised_map = map_obj.get_normalised_map()
     offset = map_obj.get_region_offset()
     map_multipolygon: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
-
     image_data = dl.map_images_as_dict(map_regions)
-
     image: Image = img.make_image_collage(image_data)
 
     for map_polygon in map_multipolygon.get_town_polygons():
