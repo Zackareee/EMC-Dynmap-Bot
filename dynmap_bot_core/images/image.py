@@ -2,6 +2,8 @@ __all__ = ["make_image_collage", "make_grids_on_collage", "draw_filled_polygon",
 
 from PIL import Image, ImageDraw
 import random
+from dynmap_bot_core.engine.map import Map
+from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
 
 def make_image_collage(images: dict[tuple[int,int], Image]) -> Image:
@@ -86,7 +88,23 @@ def resize_image(image: Image) -> Image:
     return image.resize(size=(width * 4, height * 4), resample=Image.Resampling.NEAREST)
 
 
-def crop_image(image: Image, top_left: "Coordinate", bottom_right: "Coordinate") -> Image:
+def crop_map_and_image(mcmap: Map, imgobj: Image) -> Image:
+    """
+    Crop an image given the top left coordinate and bottom right coordinate.
+    Adds a pading of 2x the chunk size (Statically set to 16 here)
+    TODO refactor this so chunk.SIZE can be imported without a circular import, and Coordinate can be used
+    """
+    normalised_map: Map = mcmap.get_normalised_map()
+    offset: list[int] = mcmap.get_region_offset()
+    offset_map: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
+    return crop_image(
+        image=imgobj,
+        top_left=offset_map.get_polygon_top_left_corner(),
+        bottom_right=offset_map.get_polygon_bottom_right_corner(),
+    )
+
+
+def crop_image(image: Image, top_left: Coordinate, bottom_right: Coordinate) -> Image:
     """
     Crop an image given the top left coordinate and bottom right coordinate.
     Adds a pading of 2x the chunk size (Statically set to 16 here)
