@@ -1,6 +1,7 @@
 __all__ = ["Map"]
 from dynmap_bot_core.engine.coordinate import Coordinate
 from dynmap_bot_core.engine.town import Town
+from dynmap_bot_core.engine.chunk import Chunk
 from shapely.geometry import Polygon
 
 
@@ -52,7 +53,7 @@ class Map:
         """
         offset_x = self.get_polygon_top_left_corner().x
         offset_z = self.get_polygon_top_left_corner().z
-        return self.offset_towns(-offset_x, 0, -offset_z)
+        return self.offset_towns(-offset_x - Chunk.SIZE, 0, -offset_z - Chunk.SIZE)
 
     def get_town_polygons(self) -> list[Polygon]:
         """
@@ -70,8 +71,8 @@ class Map:
         Gets the maps offset from the nearest region border
         """
         minimum_coordinate: Coordinate = self.get_polygon_top_left_corner()
-        x_offset: int = minimum_coordinate.x % 512
-        z_offset: int = minimum_coordinate.z % 512
+        x_offset: int = (minimum_coordinate.x + Chunk.SIZE) % 512
+        z_offset: int = (minimum_coordinate.z + Chunk.SIZE) % 512
         offset: list[int] = [x_offset, z_offset]
         return offset
 
