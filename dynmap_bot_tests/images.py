@@ -22,53 +22,9 @@ def test_coordinates_with_map():
     )
     image.resize_image(cropped_image).show()
 
-
-def test_coordinates_with_map_nw():
-    town_names: list[str] = ["Marseilles", "Chicago"]
-    map_obj: Map = misc.build_map(town_names)
-
-    normalised_map: Map = map_obj.get_normalised_map()
-    offset: list[int] = map_obj.get_region_offset()
-    offset_map: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
-
-    image_obj: Image = misc.build_image_with_map(map_obj)
-    cropped_image: Image = image.crop_image(
-        image=image_obj,
-        top_left=offset_map.get_polygon_top_left_corner(),
-        bottom_right=offset_map.get_polygon_bottom_right_corner(),
-    )
-    image.resize_image(cropped_image).show()
-
-
-def test_coordinates_with_france():
-    town_names: list[str] = ["Limerick", "Paris", "Brittany"]
-    map_obj: Map = misc.build_map(town_names)
-
-    normalised_map: Map = map_obj.get_normalised_map()
-    offset: list[int] = map_obj.get_region_offset()
-    offset_map: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
-
-    image_obj: Image = misc.build_image_with_map(map_obj)
-    cropped_image: Image = image.crop_image(
-        image=image_obj,
-        top_left=offset_map.get_polygon_top_left_corner(),
-        bottom_right=offset_map.get_polygon_bottom_right_corner(),
-    )
-    image.resize_image(cropped_image).show()
-
-
 def test_coordinates_with_limerick():
     town_names: list[str] = ["Limerick"]
     map_obj: Map = misc.build_map(town_names)
-    image_obj: Image = misc.build_image_with_map(map_obj)
-
-    image.resize_image(image_obj).show()
-
-
-def test_coordinates_with_new_france():
-    town_names: list[str] = ["Paris", "Brittany"]
-    map_obj: Map = misc.build_map(town_names)
-
     image_obj: Image = misc.build_image_with_map(map_obj)
 
     image.resize_image(image_obj).show()
