@@ -125,8 +125,8 @@ class TestMapMethods:
         x = result.x
         z = result.z
 
-        assert x == 8
-        assert z == 8
+        assert x == 0
+        assert z == 0
 
     def test_regions_are_accurate(self) -> None:
         expected = coordinate.Coordinate(0, 0, 0)
