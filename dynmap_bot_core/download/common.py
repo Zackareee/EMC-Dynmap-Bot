@@ -2,6 +2,7 @@ __all__ = ["download_town", "download_nation"]
 import requests
 import json
 
+
 def download_town(name: str) -> dict:
     """
     Downloads a json object from the town api endpoint.
@@ -13,6 +14,7 @@ def download_town(name: str) -> dict:
     x: requests.Response = requests.post(url, json={"query": [name]})
     town: dict = json.loads(x.text)[0]
     return town
+
 
 def download_nation(name: str) -> dict:
     """

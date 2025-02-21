@@ -18,6 +18,7 @@ def ensure_multipolygon(geometry: Polygon | MultiPolygon) -> MultiPolygon:
     else:
         raise TypeError("Input geometry must be a Polygon or MultiPolygon.")
 
+
 class Town:
     def __init__(self, chunks):
         self.chunks: [Chunk] = chunks

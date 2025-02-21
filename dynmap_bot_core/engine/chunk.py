@@ -1,6 +1,7 @@
 __all__ = ["Chunk"]
 from dynmap_bot_core.engine import coordinate
 
+
 class Chunk(coordinate.Coordinate):
     SIZE = 16
 

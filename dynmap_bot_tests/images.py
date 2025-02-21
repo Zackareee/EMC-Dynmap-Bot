@@ -22,9 +22,9 @@ def test_build_map_with_town_names(town_names: list[str]):
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
     image.resize_image(cropped_image).show()
 
+
 def test_build_map_with_nation_names():
     map_obj: Map = misc.build_nation("France")
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
     image.resize_image(cropped_image).show()
-

@@ -4,7 +4,8 @@ import requests
 from PIL import Image
 from io import BytesIO
 
-def map_images_as_dict(regions: list["Coordinate"]) -> dict[tuple[int,int], Image]:
+
+def map_images_as_dict(regions: list["Coordinate"]) -> dict[tuple[int, int], Image]:
     """
     Given a list of region objects (x, z) these will be returned in a dictionary with an image object associated with
     each coordinate.
@@ -17,7 +18,7 @@ def map_images_as_dict(regions: list["Coordinate"]) -> dict[tuple[int,int], Imag
         if (coord.x, coord.z) not in region_images.keys():
             x = int(coord.x)
             z = int(coord.z)
-            region_images[(x,z)] = download_map_image(x, z)
+            region_images[(x, z)] = download_map_image(x, z)
     return region_images
 
 

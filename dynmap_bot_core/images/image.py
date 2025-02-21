@@ -1,4 +1,10 @@
-__all__ = ["make_image_collage", "make_grids_on_collage", "draw_filled_polygon", "crop_image", "resize_image"]
+__all__ = [
+    "make_image_collage",
+    "make_grids_on_collage",
+    "draw_filled_polygon",
+    "crop_image",
+    "resize_image",
+]
 
 from PIL import Image, ImageDraw
 import random
@@ -6,7 +12,8 @@ from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
 
-def make_image_collage(images: dict[tuple[int,int], Image]) -> Image:
+
+def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
     """
     Collates all images in a dictionary into a single image, placing them at their corresponding coordinate.
     :param images: A dictionary of image coordinates to image.
@@ -25,7 +32,9 @@ def make_image_collage(images: dict[tuple[int,int], Image]) -> Image:
     canvas_height: int = (max_z - min_z + 1) * TILESIZE
 
     # Create a blank canvas with a white background
-    canvas: Image = Image.new(mode="RGBA", size=(canvas_width, canvas_height), color="white")
+    canvas: Image = Image.new(
+        mode="RGBA", size=(canvas_width, canvas_height), color="white"
+    )
 
     # Place images on the canvas
     for (x, y), img in images.items():
@@ -34,7 +43,8 @@ def make_image_collage(images: dict[tuple[int,int], Image]) -> Image:
         canvas.paste(img, (paste_x, paste_y))
     return canvas
 
-def create_random_colour() -> tuple[int,int,int,int]:
+
+def create_random_colour() -> tuple[int, int, int, int]:
     """
     Creates a tuple representing an RGBA value
     :return: tuple
@@ -46,6 +56,7 @@ def create_random_colour() -> tuple[int,int,int,int]:
         int(255 * 0.5),
     )
 
+
 def make_grids_on_collage(polygon: Polygon, canvas: Image) -> Image:
     """
     Draws polygons onto an Image object, returning the modified Image.
@@ -54,15 +65,19 @@ def make_grids_on_collage(polygon: Polygon, canvas: Image) -> Image:
     :param canvas:
     :return:
     """
-    polygon_coords: list[list[int]] = [[int(x), int(z)] for x, z in polygon.exterior.coords]
-    color: tuple[int,int,int,int] = create_random_colour()
-    res: list[tuple[int, ...]] = list(tuple(a + 8 for a in sub) for sub in polygon_coords)
+    polygon_coords: list[list[int]] = [
+        [int(x), int(z)] for x, z in polygon.exterior.coords
+    ]
+    color: tuple[int, int, int, int] = create_random_colour()
+    res: list[tuple[int, ...]] = list(
+        tuple(a + 8 for a in sub) for sub in polygon_coords
+    )
     canvas: Image = draw_filled_polygon(canvas, res, color)
 
     return canvas
 
 
-def draw_filled_polygon(canvas: Image, points, color: tuple[int,int,int,int]):
+def draw_filled_polygon(canvas: Image, points, color: tuple[int, int, int, int]):
     """
     Draws a filled polygon on the canvas with transparency.
     :param canvas: The canvas Image object.
@@ -77,6 +92,7 @@ def draw_filled_polygon(canvas: Image, points, color: tuple[int,int,int,int]):
 
     # Composite the overlay onto the original canvas
     return Image.alpha_composite(canvas.convert("RGBA"), overlay)
+
 
 def resize_image(image: Image) -> Image:
     """

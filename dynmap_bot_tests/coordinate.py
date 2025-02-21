@@ -3,6 +3,7 @@ from shapely.geometry import Polygon
 
 from dynmap_bot_core.engine import coordinate
 
+
 class TestChunkMethods:
     def test_coordinate_initialisation(self) -> None:
         c = coordinate.Chunk(1, 32, 1)

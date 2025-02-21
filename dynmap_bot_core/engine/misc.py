@@ -9,13 +9,14 @@ from dynmap_bot_core import download as dl
 from dynmap_bot_core.images import image as img
 from PIL import Image
 
-def unpack_town_coordinates(town_json: dict) -> list[list[int,int]]:
+
+def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
     """
     Given a dictionary of a town object, return all coordinates
     :param town_json: Town object as a dictionary.
     :return: list of ints for all coordinates.
     """
-    coordinates: list[list[int,int]] = [town_json["coordinates"]["townBlocks"]]
+    coordinates: list[list[int, int]] = [town_json["coordinates"]["townBlocks"]]
     return coordinates
 
 
@@ -27,8 +28,11 @@ def build_town(town_name: str) -> Town:
     :param town_name:
     :return:
     """
-    town: list[list[int,int]] = unpack_town_coordinates(common.download_town(town_name))
+    town: list[list[int, int]] = unpack_town_coordinates(
+        common.download_town(town_name)
+    )
     return Town([Chunk(x, 0, z) for x, z in town[0]])
+
 
 def build_nation(nation_name: str) -> Nation:
     """
@@ -37,9 +41,10 @@ def build_nation(nation_name: str) -> Nation:
     :return:
     """
     town_names_dict = common.download_nation(nation_name)["towns"]
-    town_names = [item['name'] for item in town_names_dict]
+    town_names = [item["name"] for item in town_names_dict]
     towns = [build_town(town) for town in town_names]
     return Nation(towns)
+
 
 def build_map(town_names: list[str]) -> Map:
     """
