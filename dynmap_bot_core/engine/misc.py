@@ -8,13 +8,14 @@ from dynmap_bot_core import download as dl
 from dynmap_bot_core.images import image as img
 from PIL import Image
 
-def unpack_town_coordinates(town_json: dict) -> list[list[int,int]]:
+
+def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
     """
     Given a dictionary of a town object, return all coordinates
     :param town_json: Town object as a dictionary.
     :return: list of ints for all coordinates.
     """
-    coordinates: list[list[int,int]] = [town_json["coordinates"]["townBlocks"]]
+    coordinates: list[list[int, int]] = [town_json["coordinates"]["townBlocks"]]
     return coordinates
 
 
@@ -26,7 +27,9 @@ def build_town(town_name: str) -> Town:
     :param town_name:
     :return:
     """
-    town: list[list[int,int]] = unpack_town_coordinates(common.download_town(town_name))
+    town: list[list[int, int]] = unpack_town_coordinates(
+        common.download_town(town_name)
+    )
     return Town([Chunk(x, 0, z) for x, z in town[0]])
 
 
@@ -36,7 +39,8 @@ def build_map(town_names: list[str]) -> Map:
     :param town_names:
     :return:
     """
-    return Map([build_town(town) for town in town_names])
+    towns = [build_town(town) for town in town_names]
+    return Map(towns)
 
 
 def build_image_with_map(map_obj: Map) -> Image:
@@ -47,13 +51,10 @@ def build_image_with_map(map_obj: Map) -> Image:
     :return: an Image object with the polygon overlayed ontop of the background
     """
     map_regions: list[Coordinate] = list(map_obj.get_regions())
-
     normalised_map = map_obj.get_normalised_map()
     offset = map_obj.get_region_offset()
     map_multipolygon: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
-
     image_data = dl.map_images_as_dict(map_regions)
-
     image: Image = img.make_image_collage(image_data)
 
     for map_polygon in map_multipolygon.get_town_polygons():
