@@ -2,6 +2,7 @@ __all__ = ["build_map", "build_town", "build_image_with_map"]
 from dynmap_bot_core.engine.town import Town
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.chunk import Chunk
+from dynmap_bot_core.engine.nation import Nation
 from dynmap_bot_core.engine.coordinate import Coordinate
 from dynmap_bot_core.download import common
 from dynmap_bot_core import download as dl
@@ -31,6 +32,18 @@ def build_town(town_name: str) -> Town:
         common.download_town(town_name)
     )
     return Town([Chunk(x, 0, z) for x, z in town[0]])
+
+
+def build_nation(nation_name: str) -> Nation:
+    """
+    Returns a town object given the town name.
+    :param nation_name:
+    :return:
+    """
+    town_names_dict = common.download_nation(nation_name)["towns"]
+    town_names = [item["name"] for item in town_names_dict]
+    towns = [build_town(town) for town in town_names]
+    return Nation(towns)
 
 
 def build_map(town_names: list[str]) -> Map:
