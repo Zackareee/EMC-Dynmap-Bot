@@ -5,6 +5,7 @@ from PIL import Image
 import pytest
 
 
+
 # TODO mock these with static towns and/or json data.
 # This currently just acts an an entry point to manually test.
 @pytest.mark.parametrize(
@@ -17,6 +18,7 @@ import pytest
     ],
 )
 def test_build_map_with_town_names(town_names: list[str]):
+
     map_obj: Map = misc.build_map(town_names)
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
@@ -28,3 +30,10 @@ def test_build_map_with_nation_names():
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
     image.resize_image(cropped_image).show()
+
+def test_coordinates_with_limerick():
+    town_names: list[str] = ["Limerick"]
+    map_obj: Map = misc.build_map(town_names)
+    image_obj: Image = misc.build_image_with_map(map_obj)
+
+    image.resize_image(image_obj).show()
