@@ -29,6 +29,7 @@ def download_nation(name: str) -> dict:
     nation: dict = json.loads(x.text)[0]
     return nation
 
+
 def sanitize_filename(filename: str) -> str:
     """
     Serves as a helper function for tests to sanitize a filename to meet the windows filename requirements.
