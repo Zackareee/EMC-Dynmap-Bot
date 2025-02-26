@@ -7,7 +7,7 @@ from dynmap_bot_core.engine.coordinate import Coordinate
 from dynmap_bot_core.download import common
 from dynmap_bot_core import download as dl
 from dynmap_bot_core.images import image as img
-from PIL import Image
+from PIL import Image, ImageColor
 
 
 def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
@@ -19,6 +19,22 @@ def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
     coordinates: list[list[int, int]] = [town_json["coordinates"]["townBlocks"]]
     return coordinates
 
+def unpack_town_colour(town_json: dict) -> tuple[int, ...]:
+    """
+    Given a dictionary of a town object, return all coordinates
+    :param town_json: Town object as a dictionary.
+    :return: list of ints for all coordinates.
+    """
+    nation_name: str = town_json["nation"]["name"]
+    if nation_name is not None:
+        nation = common.download_nation(nation_name)
+        hex_colour = nation["dynmapColour"]
+    else:
+        hex_colour = "89c500"
+    rgb_colour = ImageColor.getcolor(f"#{hex_colour}", "RGB")
+    rgba_colour = rgb_colour + (100,)
+    return rgba_colour
+
 
 # TODO build an abstraction on town so nations and towns can be mixed - Maybe a bad idea since a town and nation can
 #  have the same name
@@ -28,10 +44,12 @@ def build_town(town_name: str) -> Town:
     :param town_name:
     :return:
     """
-    town: list[list[int, int]] = unpack_town_coordinates(
-        common.download_town(town_name)
+    town = common.download_town(town_name)
+    town_obj: list[list[int, int]] = unpack_town_coordinates(
+        town
     )
-    return Town([Chunk(x, 0, z) for x, z in town[0]])
+    town_colour = unpack_town_colour(town)
+    return Town(chunks=[Chunk(x, 0, z) for x, z in town_obj[0]], colour=town_colour)
 
 
 def build_nation(nation_name: str) -> Nation:
@@ -70,7 +88,7 @@ def build_image_with_map(map_obj: Map) -> Image:
     image_data = dl.map_images_as_dict(map_regions)
     image: Image = img.make_image_collage(image_data)
 
-    for map_polygon in map_multipolygon.get_town_polygons():
-        image = img.make_grids_on_collage(map_polygon, image)
+    for map_dict in map_multipolygon.get_town_polygons():
+        image = img.make_grids_on_collage(map_dict, image)
 
     return image

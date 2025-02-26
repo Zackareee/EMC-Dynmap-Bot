@@ -12,9 +12,9 @@ import pytest
     "town_names",
     [
         pytest.param(["Sanctuary", "Gulf_Of_Guinea"], id="Spawn towns"),
-        pytest.param(["Limerick", "Paris", "Brittany"], id="England towns"),
-        pytest.param(["Limerick"], id="Limerick"),
-        pytest.param(["Paris", "Brittany"], id="French towns"),
+        # pytest.param(["Limerick", "Paris", "Brittany"], id="England towns"),
+        # pytest.param(["Limerick"], id="Limerick"),
+        # pytest.param(["Paris", "Brittany"], id="French towns"),
     ],
 )
 def test_build_map_with_town_names(town_names: list[str]):

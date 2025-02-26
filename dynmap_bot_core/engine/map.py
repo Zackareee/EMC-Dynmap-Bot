@@ -61,7 +61,7 @@ class Map:
         :return:
         """
         return [
-            polygon
+            {"polygon":polygon, "colour":multi_polygon.colour}
             for multi_polygon in self.towns
             for polygon in multi_polygon.as_polygon().geoms
         ]
