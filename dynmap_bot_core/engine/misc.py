@@ -19,6 +19,7 @@ def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
     coordinates: list[list[int, int]] = [town_json["coordinates"]["townBlocks"]]
     return coordinates
 
+
 def unpack_town_colour(town_json: dict) -> tuple[int, ...]:
     """
     Given a dictionary of a town object, return all coordinates
@@ -36,8 +37,6 @@ def unpack_town_colour(town_json: dict) -> tuple[int, ...]:
     return rgba_colour
 
 
-# TODO build an abstraction on town so nations and towns can be mixed - Maybe a bad idea since a town and nation can
-#  have the same name
 def build_town(town_name: str) -> Town:
     """
     Returns a town object given the town name.
@@ -45,9 +44,7 @@ def build_town(town_name: str) -> Town:
     :return:
     """
     town = common.download_town(town_name)
-    town_obj: list[list[int, int]] = unpack_town_coordinates(
-        town
-    )
+    town_obj: list[list[int, int]] = unpack_town_coordinates(town)
     town_colour = unpack_town_colour(town)
     return Town(chunks=[Chunk(x, 0, z) for x, z in town_obj[0]], colour=town_colour)
 

@@ -57,7 +57,9 @@ def create_random_colour() -> tuple[int, int, int, int]:
     )
 
 
-def make_grids_on_collage(map_dict: dict[str,Polygon,str,tuple[int,...]], canvas: Image) -> Image:
+def make_grids_on_collage(
+    map_dict: dict[str, Polygon, str, tuple[int, ...]], canvas: Image
+) -> Image:
     """
     Draws polygons onto an Image object, returning the modified Image.
     TODO consider refactoring this method, the types are unpleasant. ALSO rename this method

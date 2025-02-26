@@ -20,7 +20,14 @@ def ensure_multipolygon(geometry: Polygon | MultiPolygon) -> MultiPolygon:
 
 
 class Town:
-    def __init__(self, chunks, colour):
+    def __init__(
+        self,
+        town_name: str,
+        chunks: [Chunk] | None = None,
+        colour: tuple[int, int, int, int] = (0, 0, 0, 255),
+    ):
+        self.town_name = town_name
+
         self.chunks: [Chunk] = chunks
         self.colour = colour
 
