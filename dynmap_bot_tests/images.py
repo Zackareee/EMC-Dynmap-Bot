@@ -1,6 +1,7 @@
 from dynmap_bot_core.engine import misc
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.images import image
+from dynmap_bot_core.engine.nation import Nation
 from PIL import Image
 import pytest
 
@@ -25,7 +26,7 @@ def test_build_map_with_town_names(town_names: list[str]):
 
 
 def test_build_map_with_nation_names():
-    map_obj: Map = misc.build_nation("France")
+    map_obj: Map = Nation("France")
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
     image.resize_image(cropped_image).show()

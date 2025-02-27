@@ -101,7 +101,7 @@ class TestMapMethods:
         town = coordinate.Town([coord])
         map = coordinate.Map([town])
 
-        result = map.get_town_polygons()
+        result = map.get_polygons()
 
         assert isinstance(result, list)
         for i in result:
@@ -112,7 +112,7 @@ class TestMapMethods:
         town = coordinate.Town([coord])
         map = coordinate.Map([town])
 
-        result = map.get_town_polygons()
+        result = map.get_polygons()
 
         assert isinstance(result, list)
 

@@ -18,6 +18,7 @@ setup(
         "Pillow",
         "requests",
         "sqlalchemy",
+        "shapely=1.7",
     ],
     extras_require={
         "dev": ["pytest", "mypy", "black"],  # Additional dependencies for development

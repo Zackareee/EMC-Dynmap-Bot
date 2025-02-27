@@ -1,11 +1,38 @@
 __all__ = ["Town"]
+
+from shapely.geometry.polygon import Polygon
+
 from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.coordinate import Coordinate
-from shapely.geometry import Polygon, MultiPolygon
+from dynmap_bot_core.download import common
+from shapely.geometry import MultiPolygon
 from shapely.ops import unary_union
+from PIL import ImageColor
+from dynmap_bot_core.engine.colored_polygon import ColoredPolygon
 
 
-def ensure_multipolygon(geometry: Polygon | MultiPolygon) -> MultiPolygon:
+def hex_to_rgba(hex_color: str) -> tuple:
+    rgb_color = ImageColor.getcolor(f"#{hex_color}", "RGB")
+    rgba_color = rgb_color + (100,)
+    return rgba_color
+
+
+def unpack_town_color(town_json: dict) -> tuple[int, ...]:
+    """
+    Given a dictionary of a town object, return all coordinates
+    :param town_json: Town object as a dictionary.
+    :return: list of ints for all coordinates.
+    """
+    nation_name: str = town_json["nation"]["name"]
+    if nation_name is not None:
+        nation = common.download_nation(nation_name)
+        hex_color = nation["dynmapColour"]
+    else:
+        hex_color = "89c500"
+    return hex_to_rgba(hex_color)
+
+
+def ensure_multipolygon(geometry: ColoredPolygon | MultiPolygon) -> MultiPolygon:
     """
      Convert a Polygon to a MultiPolygon if it isn't one already.
     :param geometry: A possible Polygon or Multipolygon.
@@ -23,13 +50,31 @@ class Town:
     def __init__(
         self,
         town_name: str,
-        chunks: [Chunk] | None = None,
-        colour: tuple[int, int, int, int] = (0, 0, 0, 255),
+        chunks: list[Coordinate] | None = None,
+        colour: tuple[int, int, int, int] = None,
     ):
         self.town_name = town_name
-
-        self.chunks: [Chunk] = chunks
+        self.chunks: [Coordinate] = chunks
         self.colour = colour
+        self._init()
+
+    def _init(self):
+        if self.colour is None:
+            self.colour = unpack_town_color(common.download_town(self.town_name))
+        if self.chunks is None:
+            self.chunks = self._build_town()
+
+    def _build_town(self):
+        """
+        Returns a town object given the town name.
+        :param town_name:
+        :return:
+        """
+        town_json = common.download_town(self.town_name)
+        town_coordinates: list[list[int, int]] = [
+            town_json["coordinates"]["townBlocks"]
+        ]
+        return [Chunk(x, 0, z) for x, z in town_coordinates[0]]
 
     def offset_chunks(self, x, y, z) -> "Town":
         """
@@ -39,7 +84,7 @@ class Town:
         _chunks = []
         for chunk in self.chunks:
             _chunks.append(Coordinate(x=chunk.x + x, y=chunk.y + y, z=chunk.z + z))
-        return Town(chunks=_chunks, colour=self.colour)
+        return Town(town_name=self.town_name, chunks=_chunks, colour=self.colour)
 
     def get_polygon_top_left_corner(self) -> Coordinate:
         """
