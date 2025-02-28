@@ -20,8 +20,9 @@ def ensure_multipolygon(geometry: Polygon | MultiPolygon) -> MultiPolygon:
 
 
 class Town:
-    def __init__(self, chunks):
+    def __init__(self, chunks, colour):
         self.chunks: [Chunk] = chunks
+        self.colour = colour
 
     def offset_chunks(self, x, y, z) -> "Town":
         """
@@ -31,7 +32,7 @@ class Town:
         _chunks = []
         for chunk in self.chunks:
             _chunks.append(Coordinate(x=chunk.x + x, y=chunk.y + y, z=chunk.z + z))
-        return Town(chunks=_chunks)
+        return Town(chunks=_chunks, colour=self.colour)
 
     def get_polygon_top_left_corner(self) -> Coordinate:
         """
