@@ -8,6 +8,7 @@ from unittest.mock import patch
 import json
 import io
 
+
 def download_map_image(x: int, z: int):
     return Image.open(f"./images/{x}_{z}.png")
 
@@ -59,13 +60,8 @@ def test_build_map_with_town_names(town_names: list[str], mocked_downloads):
     assert not diff.getbbox()
 
 
-<<<<<<< HEAD:dynmap_bot_tests/test_images.py
-def test_build_map_with_nation_names():
-    Image.MAX_IMAGE_PIXELS = 292990976
-
-=======
 def test_build_map_with_nation_names(mocked_downloads) -> None:
->>>>>>> 95f88f79bdf33bf3217f0528aab2b3a63e57dc42:dynmap_bot_tests/images.py
+    Image.MAX_IMAGE_PIXELS = 292990976
     map_obj: Map = misc.build_nation("France")
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
@@ -76,7 +72,6 @@ def test_build_map_with_nation_names(mocked_downloads) -> None:
     )
     diff = ImageChops.difference(resized_image, reg)
     assert not diff.getbbox()
-
 
 
 def test_coordinates_with_limerick(mocked_downloads) -> None:
