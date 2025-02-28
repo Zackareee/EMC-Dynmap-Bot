@@ -65,9 +65,8 @@ def test_build_map_with_town_names(town_names: list[str], mocked_downloads):
     assert not diff.getbbox()
 
 
-def test_build_map_with_nation_names():
+def test_build_map_with_nation_names(mocked_downloads) -> None:
     Image.MAX_IMAGE_PIXELS = 292990976
-
     map_obj: Map = misc.build_nation("France")
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
@@ -78,7 +77,6 @@ def test_build_map_with_nation_names():
     )
     diff = ImageChops.difference(resized_image, reg)
     assert not diff.getbbox()
-
 
 
 def test_coordinates_with_limerick(mocked_downloads) -> None:
