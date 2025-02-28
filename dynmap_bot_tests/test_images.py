@@ -12,17 +12,19 @@ import io
 
 
 def download_map_image(x: int, z: int):
-    return Image.open(f"./images/{x}_{z}.png")
+    return Image.open(f"./dynmap_bot_tests/images/{x}_{z}.png")
 
 
 def download_town(town_name):
-    with open(f"./json/town/{common.sanitize_filename(town_name)}.json") as f:
+    with open(
+        f"./dynmap_bot_tests/json/town/{common.sanitize_filename(town_name)}.json"
+    ) as f:
         return json.load(f)[0]
 
 
 def download_nation(nation_name):
     with io.open(
-        f"./json/nation/{common.sanitize_filename(nation_name)}.json",
+        f"./dynmap_bot_tests/json/nation/{common.sanitize_filename(nation_name)}.json",
         mode="r",
         encoding="utf-8",
     ) as f:
