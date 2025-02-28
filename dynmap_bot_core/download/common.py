@@ -1,6 +1,7 @@
 __all__ = ["download_town", "download_nation"]
 import requests
 import json
+import urllib.parse
 
 
 def download_town(name: str) -> dict:
@@ -27,3 +28,16 @@ def download_nation(name: str) -> dict:
     x: requests.Response = requests.post(url, json={"query": [name]})
     nation: dict = json.loads(x.text)[0]
     return nation
+
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Serves as a helper function for tests to sanitize a filename to meet the windows filename requirements.
+    Use urllib.parse.unquote(str) to recover the filename.
+    :param filename:
+    :return:
+    """
+    safe_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.() "
+    sanitized = urllib.parse.quote(filename, safe=safe_chars)
+    sanitized = sanitized.rstrip(" .")
+    return sanitized
