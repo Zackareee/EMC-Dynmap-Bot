@@ -53,7 +53,7 @@ class Map:
         """
         offset_x = self.get_polygon_top_left_corner().x
         offset_z = self.get_polygon_top_left_corner().z
-        return self.offset_towns(-offset_x - Chunk.SIZE, 0, -offset_z - Chunk.SIZE)
+        return self.offset_towns(-offset_x, 0, -offset_z)
 
     def get_town_polygons(self) -> list[Polygon]:
         """

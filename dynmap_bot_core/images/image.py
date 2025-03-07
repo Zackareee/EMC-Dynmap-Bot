@@ -111,6 +111,8 @@ def crop_map_and_image(mcmap: Map, imgobj: Image) -> Image:
     TODO refactor this so chunk.SIZE can be imported without a circular import, and Coordinate can be used
     """
     normalised_map: Map = mcmap.get_normalised_map()
+    normalised_map: Map = normalised_map.offset_towns(-16, 0, -16)
+
     offset: list[int] = mcmap.get_region_offset()
     offset_map: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
     return crop_image(

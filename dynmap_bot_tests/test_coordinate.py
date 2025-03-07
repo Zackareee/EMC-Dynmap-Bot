@@ -119,9 +119,9 @@ class TestMapMethods:
 
         assert isinstance(result, list)
 
-    def test_normalised_polygons_minimum_is_offset_by_chunk(
+    def test_normalised_polygons_minimum_is_zero(
         self,
-    ) -> None:  # todo change this to zero and offset in separate step
+    ) -> None:
         coord = Chunk(10, 0, 10)
         town = Town([coord])
         _map = Map([town])
@@ -131,8 +131,8 @@ class TestMapMethods:
         x = result.x
         z = result.z
 
-        assert x == -16
-        assert z == -16
+        assert x == 0
+        assert z == 0
 
     def test_regions_are_accurate(self) -> None:
         expected = Coordinate(0, 0, 0)
