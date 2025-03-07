@@ -117,6 +117,8 @@ def crop_map_and_image(mcmap: Map, imgobj: Image) -> Image:
     """
     offset: list[int] = mcmap.get_region_offset()
     mcmap.normalise()
+    mcmap.offset_towns(-16, 0, -16)
+
     mcmap.offset_towns(offset[0], 0, offset[1])
     return crop_image(
         image=imgobj,
