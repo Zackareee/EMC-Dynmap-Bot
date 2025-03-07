@@ -5,6 +5,8 @@ from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.coordinate import Coordinate
 from dynmap_bot_core.engine.town import Town
 from dynmap_bot_core.engine.map import Map
+
+
 class TestChunkMethods:
     def test_coordinate_initialisation(self) -> None:
         c = Chunk(1, 32, 1)
@@ -117,7 +119,9 @@ class TestMapMethods:
 
         assert isinstance(result, list)
 
-    def test_normalised_polygons_minimum_is_offset_by_chunk(self) -> None: #todo change this to zero and offset in separate step
+    def test_normalised_polygons_minimum_is_offset_by_chunk(
+        self,
+    ) -> None:  # todo change this to zero and offset in separate step
         coord = Chunk(10, 0, 10)
         town = Town([coord])
         _map = Map([town])

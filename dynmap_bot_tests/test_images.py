@@ -10,12 +10,16 @@ import json
 import io
 import os
 
+
 @pytest.fixture
 def testing_directory():
     return os.path.dirname(os.path.realpath(__file__))
 
+
 def download_map_image(x: int, z: int):
-    return Image.open(f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png")
+    return Image.open(
+        f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png"
+    )
 
 
 def download_town(town_name):
@@ -57,8 +61,12 @@ def mocked_downloads():
         pytest.param(["Sanctuary", "Gulf_Of_Guinea"], id="Spawn towns"),
     ],
 )
-def test_build_map_with_town_names(testing_directory, town_names: list[str], mocked_downloads):
-    reg = Image.open(f"{testing_directory}/snapshots/test_build_map_with_town_names.png")
+def test_build_map_with_town_names(
+    testing_directory, town_names: list[str], mocked_downloads
+):
+    reg = Image.open(
+        f"{testing_directory}/snapshots/test_build_map_with_town_names.png"
+    )
 
     map_obj: Map = misc.build_map(town_names)
     image_obj: Image = misc.build_image_with_map(map_obj)
@@ -68,9 +76,10 @@ def test_build_map_with_town_names(testing_directory, town_names: list[str], moc
     assert not diff.getbbox()
 
 
-
 def test_build_map_with_nation_names(testing_directory, mocked_downloads) -> None:
-    reg = Image.open(f"{testing_directory}/snapshots/test_build_map_with_nation_names.png")
+    reg = Image.open(
+        f"{testing_directory}/snapshots/test_build_map_with_nation_names.png"
+    )
 
     map_obj: Map = misc.build_nation("France")
     image_obj: Image = misc.build_image_with_map(map_obj)
@@ -81,7 +90,9 @@ def test_build_map_with_nation_names(testing_directory, mocked_downloads) -> Non
 
 
 def test_coordinates_with_limerick(testing_directory, mocked_downloads) -> None:
-    reg = Image.open(f"{testing_directory}/snapshots/test_coordinates_with_limerick.png")
+    reg = Image.open(
+        f"{testing_directory}/snapshots/test_coordinates_with_limerick.png"
+    )
 
     town_names: list[str] = ["Limerick"]
     map_obj: Map = misc.build_map(town_names)
