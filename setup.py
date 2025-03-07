@@ -23,7 +23,6 @@ setup(
         "click",
         "colorama",
         "discord.py",
-        "emc_dynmap_bot",
         "frozenlist",
         "greenlet",
         "idna",

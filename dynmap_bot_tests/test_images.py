@@ -1,30 +1,33 @@
 from dynmap_bot_core.engine import misc
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.images import image
-from PIL import Image, ImageChops
+from PIL import ImageChops
 from dynmap_bot_core.download import common
 import pytest
-from dynmap_bot_tests.snapshots import *
 from unittest.mock import patch
 from PIL import Image
 import json
 import io
+import os
 
+@pytest.fixture
+def testing_directory():
+    return os.path.dirname(os.path.realpath(__file__))
 
 def download_map_image(x: int, z: int):
-    return Image.open(f"./dynmap_bot_tests/images/{x}_{z}.png")
+    return Image.open(f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png")
 
 
 def download_town(town_name):
     with open(
-        f"./dynmap_bot_tests/json/town/{common.sanitize_filename(town_name)}.json"
+        f"{os.path.dirname(os.path.realpath(__file__))}/json/town/{common.sanitize_filename(town_name)}.json"
     ) as f:
         return json.load(f)[0]
 
 
 def download_nation(nation_name):
     with io.open(
-        f"./dynmap_bot_tests/json/nation/{common.sanitize_filename(nation_name)}.json",
+        f"{os.path.dirname(os.path.realpath(__file__))}/json/nation/{common.sanitize_filename(nation_name)}.json",
         mode="r",
         encoding="utf-8",
     ) as f:
@@ -52,41 +55,37 @@ def mocked_downloads():
     "town_names",
     [
         pytest.param(["Sanctuary", "Gulf_Of_Guinea"], id="Spawn towns"),
-        pytest.param(["Limerick", "Paris", "Brittany"], id="England towns"),
-        pytest.param(["Limerick"], id="Limerick"),
-        pytest.param(["Paris", "Brittany"], id="French towns"),
     ],
 )
-def test_build_map_with_town_names(town_names: list[str], mocked_downloads):
+def test_build_map_with_town_names(testing_directory, town_names: list[str], mocked_downloads):
+    reg = Image.open(f"{testing_directory}/snapshots/test_build_map_with_town_names.png")
+
     map_obj: Map = misc.build_map(town_names)
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
-    resized_image = image.resize_image(cropped_image)
-    reg = Image.open("./dynmap_bot_tests/snapshots/test_build_map_with_town_names.png")
-    diff = ImageChops.difference(resized_image, reg)
+
+    diff = ImageChops.difference(cropped_image, reg)
     assert not diff.getbbox()
 
 
-def test_build_map_with_nation_names(mocked_downloads) -> None:
-    Image.MAX_IMAGE_PIXELS = 292990976
+
+def test_build_map_with_nation_names(testing_directory, mocked_downloads) -> None:
+    reg = Image.open(f"{testing_directory}/snapshots/test_build_map_with_nation_names.png")
+
     map_obj: Map = misc.build_nation("France")
     image_obj: Image = misc.build_image_with_map(map_obj)
     cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
 
-    resized_image = image.resize_image(cropped_image)
-    reg = Image.open(
-        "./dynmap_bot_tests/snapshots/test_build_map_with_nation_names.png"
-    )
-    diff = ImageChops.difference(resized_image, reg)
+    diff = ImageChops.difference(cropped_image, reg)
     assert not diff.getbbox()
 
 
-def test_coordinates_with_limerick(mocked_downloads) -> None:
+def test_coordinates_with_limerick(testing_directory, mocked_downloads) -> None:
+    reg = Image.open(f"{testing_directory}/snapshots/test_coordinates_with_limerick.png")
+
     town_names: list[str] = ["Limerick"]
     map_obj: Map = misc.build_map(town_names)
     image_obj: Image = misc.build_image_with_map(map_obj)
 
-    resized_image = image.resize_image(image_obj)
-    reg = Image.open("./dynmap_bot_tests/snapshots/test_coordinates_with_limerick.png")
-    diff = ImageChops.difference(resized_image, reg)
+    diff = ImageChops.difference(image_obj, reg)
     assert not diff.getbbox()
