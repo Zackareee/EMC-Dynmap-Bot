@@ -12,7 +12,6 @@ from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
 
-
 def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
     """
     Collates all images in a dictionary into a single image, placing them at their corresponding coordinate.
@@ -69,9 +68,9 @@ def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
         [[int(x), int(z)] for x, z in polygon.exterior.coords] for polygon in polygons
     ]
     color: tuple[int, int, int, int] = create_town_colour()
-    points: list[list[tuple[int, ...]]] = [
-        [tuple(a + 8 for a in sub) for sub in polygon] for polygon in polygon_coords
-    ]
+
+    points: list[list[tuple[int, ...]]] = [[tuple(a + 8 for a in sub) for sub in polygon] for polygon in polygon_coords]
+
     canvas: Image = draw_filled_polygons(canvas, points, color)
 
     return canvas
