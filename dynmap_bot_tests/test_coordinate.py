@@ -126,8 +126,8 @@ class TestMapMethods:
         town = Town([coord])
         _map = Map([town])
 
-        normalised_map = _map.get_normalised_map()
-        result = normalised_map.get_polygon_top_left_corner()
+        _map.normalise()
+        result = _map.get_polygon_top_left_corner()
         x = result.x
         z = result.z
 

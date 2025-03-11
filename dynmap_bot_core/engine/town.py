@@ -23,15 +23,16 @@ class Town:
     def __init__(self, chunks):
         self.chunks: [Chunk] = chunks
 
-    def offset_chunks(self, x, y, z) -> "Town":
+    def offset_chunks(self, x, y, z) -> None:
         """
         Offsets all chunks within a town by given x, y, z factors.
         :return: Returns a new Town object.
         """
         _chunks = []
         for chunk in self.chunks:
-            _chunks.append(Coordinate(x=chunk.x + x, y=chunk.y + y, z=chunk.z + z))
-        return Town(chunks=_chunks)
+            chunk.x = chunk.x + x
+            chunk.y = chunk.y + y
+            chunk.z = chunk.z + z
 
     def get_polygon_top_left_corner(self) -> Coordinate:
         """
