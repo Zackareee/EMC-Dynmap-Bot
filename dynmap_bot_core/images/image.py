@@ -114,7 +114,6 @@ def crop_map_and_image(mcmap: Map, imgobj: Image) -> Image:
     """
     Crop an image given the top left coordinate and bottom right coordinate.
     Adds a pading of 2x the chunk size (Statically set to 16 here)
-    TODO refactor this so chunk.SIZE can be imported without a circular import, and Coordinate can be used
     """
     offset: list[int] = mcmap.get_region_offset()
     mcmap.normalise()
@@ -130,7 +129,6 @@ def crop_image(image: Image, top_left: Coordinate, bottom_right: Coordinate) -> 
     """
     Crop an image given the top left coordinate and bottom right coordinate.
     Adds a pading of 2x the chunk size (Statically set to 16 here)
-    TODO refactor this so chunk.SIZE can be imported without a circular import, and Coordinate can be used
     """
     crop = (
         top_left.x,
