@@ -1,7 +1,7 @@
 __all__ = [
     "make_image_collage",
-    "make_grid_on_collage",
-    "draw_filled_polygon",
+    "make_grids_on_collage",
+    "draw_filled_polygons",
     "crop_image",
     "resize_image",
 ]
@@ -60,7 +60,7 @@ def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
     """
     Draws polygons onto an Image object, returning the modified Image.
     TODO consider refactoring this method, the types are unpleasant. ALSO rename this method
-    :param polygon:
+    :param polygons:
     :param canvas:
     :return:
     """
@@ -74,27 +74,6 @@ def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
     canvas: Image = draw_filled_polygons(canvas, points, color)
 
     return canvas
-
-
-def make_grid_on_collage(polygon: Polygon, canvas: Image) -> Image:
-    """
-    Draws polygons onto an Image object, returning the modified Image.
-    TODO consider refactoring this method, the types are unpleasant. ALSO rename this method
-    :param polygon:
-    :param canvas:
-    :return:
-    """
-    polygon_coords: list[list[int]] = [
-        [int(x), int(z)] for x, z in polygon.exterior.coords
-    ]
-    color: tuple[int, int, int, int] = create_town_colour()
-    points: list[tuple[int, ...]] = list(
-        tuple(a + 8 for a in sub) for sub in polygon_coords
-    )
-    canvas: Image = draw_filled_polygon(canvas, points, color)
-
-    return canvas
-
 
 def draw_filled_polygons(canvas: Image, points, color: tuple[int, int, int, int]):
     """
@@ -111,30 +90,6 @@ def draw_filled_polygons(canvas: Image, points, color: tuple[int, int, int, int]
     # Draw polygon with fill and outline
     for polygon in points:
         draw.polygon(polygon, fill=color, outline="black")
-
-    # Use 'paste' for direct compositing if no transparency in color
-    if color[3] == 255:  # Fully opaque fill
-        canvas.paste(overlay, (0, 0), overlay)
-        return canvas
-
-    # Otherwise, use alpha_composite
-    return Image.alpha_composite(canvas, overlay)
-
-
-def draw_filled_polygon(canvas: Image, points, color: tuple[int, int, int, int]):
-    """
-    Draws a filled polygon on the canvas with transparency.
-    :param canvas: The canvas Image object.
-    :param points: List of (x, y) coordinates for the polygon.
-    :param color: List of (R, G, B, A) values.
-
-    """
-    # Create a transparent overlay
-    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))  # Transparent overlay
-    draw = ImageDraw.Draw(overlay)
-
-    # Draw polygon with fill and outline
-    draw.polygon(points, fill=color, outline="black")
 
     # Use 'paste' for direct compositing if no transparency in color
     if color[3] == 255:  # Fully opaque fill
