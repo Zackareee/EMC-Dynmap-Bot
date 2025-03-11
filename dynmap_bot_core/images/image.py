@@ -7,6 +7,7 @@ __all__ = [
 ]
 
 from PIL import Image, ImageDraw
+from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
@@ -117,8 +118,7 @@ def crop_map_and_image(mcmap: Map, imgobj: Image) -> Image:
     """
     offset: list[int] = mcmap.get_region_offset()
     mcmap.normalise()
-    mcmap.offset_towns(-16, 0, -16)
-
+    mcmap.offset_towns(-Chunk.SIZE, 0, -Chunk.SIZE)
     mcmap.offset_towns(offset[0], 0, offset[1])
     return crop_image(
         image=imgobj,
