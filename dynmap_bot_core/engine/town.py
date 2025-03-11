@@ -2,6 +2,7 @@ __all__ = ["Town"]
 from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon, MultiPolygon
+from dynmap_bot_core.engine.colorpolygon import ColorPolygon, ColorMultiPolygon
 from shapely.ops import unary_union
 
 
