@@ -1,13 +1,12 @@
 __all__ = [
     "make_image_collage",
-    "make_grids_on_collage",
+    "make_grid_on_collage",
     "draw_filled_polygon",
     "crop_image",
     "resize_image",
 ]
 
 from PIL import Image, ImageDraw
-import random
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
@@ -44,20 +43,40 @@ def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
     return canvas
 
 
-def create_random_colour() -> tuple[int, int, int, int]:
+def create_town_colour() -> tuple[int, int, int, int]:
     """
     Creates a tuple representing an RGBA value
     :return: tuple
     """
     return (
-        random.randint(0, 255),
-        random.randint(0, 255),
-        random.randint(0, 255),
+        3,
+        215,
+        252,
         int(255 * 0.5),
     )
 
 
-def make_grids_on_collage(polygon: Polygon, canvas: Image) -> Image:
+def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
+    """
+    Draws polygons onto an Image object, returning the modified Image.
+    TODO consider refactoring this method, the types are unpleasant. ALSO rename this method
+    :param polygon:
+    :param canvas:
+    :return:
+    """
+    polygon_coords: list[list[list[int]]] = [
+        [[int(x), int(z)] for x, z in polygon.exterior.coords] for polygon in polygons
+    ]
+    color: tuple[int, int, int, int] = create_town_colour()
+    points: list[list[tuple[int, ...]]] = [
+        [tuple(a + 8 for a in sub) for sub in polygon] for polygon in polygon_coords
+    ]
+    canvas: Image = draw_filled_polygons(canvas, points, color)
+
+    return canvas
+
+
+def make_grid_on_collage(polygon: Polygon, canvas: Image) -> Image:
     """
     Draws polygons onto an Image object, returning the modified Image.
     TODO consider refactoring this method, the types are unpleasant. ALSO rename this method
@@ -68,13 +87,38 @@ def make_grids_on_collage(polygon: Polygon, canvas: Image) -> Image:
     polygon_coords: list[list[int]] = [
         [int(x), int(z)] for x, z in polygon.exterior.coords
     ]
-    color: tuple[int, int, int, int] = create_random_colour()
-    res: list[tuple[int, ...]] = list(
+    color: tuple[int, int, int, int] = create_town_colour()
+    points: list[tuple[int, ...]] = list(
         tuple(a + 8 for a in sub) for sub in polygon_coords
     )
-    canvas: Image = draw_filled_polygon(canvas, res, color)
+    canvas: Image = draw_filled_polygon(canvas, points, color)
 
     return canvas
+
+
+def draw_filled_polygons(canvas: Image, points, color: tuple[int, int, int, int]):
+    """
+    Draws a filled polygon on the canvas with transparency.
+    :param canvas: The canvas Image object.
+    :param points: List of (x, y) coordinates for the polygon.
+    :param color: List of (R, G, B, A) values.
+
+    """
+    # Create a transparent overlay
+    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))  # Transparent overlay
+    draw = ImageDraw.Draw(overlay)
+
+    # Draw polygon with fill and outline
+    for polygon in points:
+        draw.polygon(polygon, fill=color, outline="black")
+
+    # Use 'paste' for direct compositing if no transparency in color
+    if color[3] == 255:  # Fully opaque fill
+        canvas.paste(overlay, (0, 0), overlay)
+        return canvas
+
+    # Otherwise, use alpha_composite
+    return Image.alpha_composite(canvas, overlay)
 
 
 def draw_filled_polygon(canvas: Image, points, color: tuple[int, int, int, int]):
@@ -86,12 +130,19 @@ def draw_filled_polygon(canvas: Image, points, color: tuple[int, int, int, int])
 
     """
     # Create a transparent overlay
-    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))
+    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))  # Transparent overlay
     draw = ImageDraw.Draw(overlay)
+
+    # Draw polygon with fill and outline
     draw.polygon(points, fill=color, outline="black")
 
-    # Composite the overlay onto the original canvas
-    return Image.alpha_composite(canvas.convert("RGBA"), overlay)
+    # Use 'paste' for direct compositing if no transparency in color
+    if color[3] == 255:  # Fully opaque fill
+        canvas.paste(overlay, (0, 0), overlay)
+        return canvas
+
+    # Otherwise, use alpha_composite
+    return Image.alpha_composite(canvas, overlay)
 
 
 def resize_image(image: Image) -> Image:
@@ -110,13 +161,13 @@ def crop_map_and_image(mcmap: Map, imgobj: Image) -> Image:
     Adds a pading of 2x the chunk size (Statically set to 16 here)
     TODO refactor this so chunk.SIZE can be imported without a circular import, and Coordinate can be used
     """
-    normalised_map: Map = mcmap.get_normalised_map()
     offset: list[int] = mcmap.get_region_offset()
-    offset_map: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
+    mcmap.normalise()
+    mcmap.offset_towns(offset[0], 0, offset[1])
     return crop_image(
         image=imgobj,
-        top_left=offset_map.get_polygon_top_left_corner(),
-        bottom_right=offset_map.get_polygon_bottom_right_corner(),
+        top_left=mcmap.get_polygon_top_left_corner(),
+        bottom_right=mcmap.get_polygon_bottom_right_corner(),
     )
 
 

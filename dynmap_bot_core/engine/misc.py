@@ -63,14 +63,15 @@ def build_image_with_map(map_obj: Map) -> Image:
     :param map_obj: a map object
     :return: an Image object with the polygon overlayed ontop of the background
     """
-    map_regions: list[Coordinate] = list(map_obj.get_regions())
-    normalised_map = map_obj.get_normalised_map()
     offset = map_obj.get_region_offset()
-    map_multipolygon: Map = normalised_map.offset_towns(offset[0], 0, offset[1])
+    map_regions: list[Coordinate] = list(map_obj.get_regions())
+    map_obj.normalise()
+    map_obj.offset_towns(offset[0], 0, offset[1])
     image_data = dl.map_images_as_dict(map_regions)
     image: Image = img.make_image_collage(image_data)
 
-    for map_polygon in map_multipolygon.get_town_polygons():
-        image = img.make_grids_on_collage(map_polygon, image)
+    image = img.make_grids_on_collage(map_obj.get_town_polygons(), image)
+    # for map_polygon in map_obj.get_town_polygons():
+    #     image = img.make_grid_on_collage(map_polygon, image)
 
     return image

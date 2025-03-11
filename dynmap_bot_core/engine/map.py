@@ -35,17 +35,16 @@ class Map:
             z=max(t.get_polygon_bottom_right_corner().z for t in self.towns),
         )
 
-    def offset_towns(self, x, y, z) -> "Map":
+    def offset_towns(self, x, y, z) -> None:
         """
         Offsets all towns within the map by given x, y, z factors.
         :return: Returns a new Map object.
         """
         _towns = []
         for town in self.towns:
-            _towns.append(town.offset_chunks(x, y, z))
-        return Map(_towns)
+            town.offset_chunks(x, y, z)
 
-    def get_normalised_map(self) -> "Map":
+    def normalise(self) -> None:
         """
         Shifts all towns on the map, such that the top left most coordinate of the Towns are now (0, 0)
         This is necessary for PIL to paste the polygons in the bounds of an image.
@@ -53,7 +52,7 @@ class Map:
         """
         offset_x = self.get_polygon_top_left_corner().x
         offset_z = self.get_polygon_top_left_corner().z
-        return self.offset_towns(-offset_x - Chunk.SIZE, 0, -offset_z - Chunk.SIZE)
+        self.offset_towns(-offset_x - Chunk.SIZE, 0, -offset_z - Chunk.SIZE)
 
     def get_town_polygons(self) -> list[Polygon]:
         """
