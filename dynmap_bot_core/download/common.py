@@ -1,4 +1,4 @@
-__all__ = ["download_towns", "download_nation"]
+__all__ = ["download_towns", "download_nations"]
 import requests
 import json
 import urllib.parse
@@ -17,7 +17,7 @@ def download_towns(name: [str]) -> dict:
     return towns
 
 
-def download_nation(name: str) -> dict:
+def download_nations(name: [str]) -> dict:
     """
     Downloads a json object from the nation api endpoint.
     This JSON will be in a format found at https://earthmc.net/docs/api#nations
@@ -25,7 +25,7 @@ def download_nation(name: str) -> dict:
     :return: A json blob of the nations details.
     """
     url: str = "https://api.earthmc.net/v3/aurora/nations"
-    x: requests.Response = requests.post(url, json={"query": [name]})
+    x: requests.Response = requests.post(url, json={"query": name})
     nation: dict = json.loads(x.text)[0]
     return nation
 

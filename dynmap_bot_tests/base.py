@@ -34,13 +34,16 @@ class TestBase:
                 result.append(json.load(f)[0])
         return result
 
-    def download_nation(self, nation_name):
-        with io.open(
-            f"{os.path.dirname(os.path.realpath(__file__))}/json/nation/{common.sanitize_filename(nation_name)}.json",
-            mode="r",
-            encoding="utf-8",
-        ) as f:
-            return json.load(f)[0]
+    def download_nation(self, nation_names):
+        result = []
+        for nation in nation_names:
+            with io.open(
+                f"{os.path.dirname(os.path.realpath(__file__))}/json/nation/{common.sanitize_filename(nation)}.json",
+                mode="r",
+                encoding="utf-8",
+            ) as f:
+                result.append(json.load(f)[0])
+        return result
 
     @pytest.fixture(autouse=True)
     def mocked_downloads(self):
@@ -51,11 +54,11 @@ class TestBase:
             "dynmap_bot_core.download.common.download_towns",
             side_effect=self.download_town,
         ) as mock_town, patch(
-            "dynmap_bot_core.download.common.download_nation",
+            "dynmap_bot_core.download.common.download_nations",
             side_effect=self.download_nation,
         ) as mock_nation:
             yield {
                 "download_map_image": mock_map,
                 "download_towns": mock_town,
-                "download_nation": mock_nation,
+                "download_nations": mock_nation,
             }

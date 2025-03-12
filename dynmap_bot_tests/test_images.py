@@ -22,7 +22,7 @@ class TestCropMapAndImage(TestBase):
             f"{self.TESTDIR}/snapshots/test_crop_with_nation_france.png"
         )
 
-        map_obj: Map = misc.build_nation(nation_name="France")
+        map_obj: Map = misc.build_nations(nation_names=["France"])
         image_obj: Image = misc.build_image_with_map(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
         self.assert_images(cropped_image, expected_image)
@@ -55,7 +55,7 @@ class TestBuildImageWithMap(TestBase):
             f"{self.TESTDIR}/snapshots/test_build_map_with_nation_france.png"
         )
 
-        map_obj: Map = misc.build_nation(nation_name="France")
+        map_obj: Map = misc.build_nations(nation_names=["France"])
         image_obj: Image = misc.build_image_with_map(map_obj)
 
         self.assert_images(image_obj, expected_image)

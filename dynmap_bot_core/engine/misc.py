@@ -36,16 +36,20 @@ def build_towns(town_names: [str]) -> [Town]:
     return result
 
 
-def build_nation(nation_name: str) -> Nation:
+def build_nations(nation_names: [str]) -> Nation:
     """
     Returns a town object given the town name.
     :param nation_name:
     :return:
     """
-    town_names_dict = common.download_nation(nation_name)["towns"]
-    town_names = [item["name"] for item in town_names_dict]
-    towns = build_towns(town_names)
-    return Nation(towns)
+    nations_json = common.download_nations(nation_names)
+    result = []
+    for n in nations_json:
+        town_names_dict = n["towns"]
+        town_names = [item["name"] for item in town_names_dict]
+        towns = build_towns(town_names)
+        result += towns
+    return Nation(result)
 
 
 def build_map(town_names: list[str]) -> Map:
