@@ -2,7 +2,11 @@ __all__ = ["Town"]
 from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon, MultiPolygon
-from dynmap_bot_core.engine.colorpolygon import ColorPolygon, ColorMultiPolygon
+from dynmap_bot_core.engine.colorpolygon import (
+    ColorPolygon,
+    ColorMultiPolygon,
+    colored_unary_union,
+)
 from shapely.ops import unary_union
 
 
@@ -66,20 +70,21 @@ class Town:
         :return:
         """
         padding = Chunk.SIZE / 2
-        unary_polygon = unary_union(
+        unary_polygon = colored_unary_union(
             [
-                Polygon(
+                ColorPolygon(
+                    "#03D7FC7F",
                     [
                         (c.x - padding, c.z - padding),
                         (c.x - padding, c.z + padding),
                         (c.x + padding, c.z + padding),
                         (c.x + padding, c.z - padding),
-                    ]
+                    ],
                 )
                 for c in self.chunks
             ]
         )
-        return ensure_multipolygon(unary_polygon)
+        return unary_polygon
 
     def get_regions(self) -> set[Coordinate]:
         """

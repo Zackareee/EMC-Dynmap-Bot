@@ -1,16 +1,18 @@
 __all__ = [
     "make_image_collage",
     "make_grids_on_collage",
-    "draw_filled_polygons",
+    "draw_polygons_on_image",
     "crop_image",
     "resize_image",
 ]
 
 from PIL import Image, ImageDraw
 from dynmap_bot_core.engine.chunk import Chunk
+from dynmap_bot_core.engine.colorpolygon import ColorPolygon
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
+
 
 def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
     """
@@ -43,19 +45,6 @@ def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
     return canvas
 
 
-def create_town_colour() -> tuple[int, int, int, int]:
-    """
-    Creates a tuple representing an RGBA value
-    :return: tuple
-    """
-    return (
-        3,
-        215,
-        252,
-        int(255 * 0.5),
-    )
-
-
 def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
     """
     Draws polygons onto an Image object, returning the modified Image.
@@ -64,39 +53,25 @@ def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
     :param canvas:
     :return:
     """
-    polygon_coords: list[list[list[int]]] = [
-        [[int(x), int(z)] for x, z in polygon.exterior.coords] for polygon in polygons
-    ]
-    color: tuple[int, int, int, int] = create_town_colour()
 
-    points: list[list[tuple[int, ...]]] = [[tuple(a + 8 for a in sub) for sub in polygon] for polygon in polygon_coords]
-
-    canvas: Image = draw_filled_polygons(canvas, points, color)
+    canvas: Image = draw_polygons_on_image(canvas, polygons)
 
     return canvas
 
-def draw_filled_polygons(canvas: Image, points, color: tuple[int, int, int, int]):
+
+def draw_polygons_on_image(canvas: Image, polygons: [ColorPolygon]):
     """
     Draws a filled polygon on the canvas with transparency.
     :param canvas: The canvas Image object.
-    :param points: List of (x, y) coordinates for the polygon.
-    :param color: List of (R, G, B, A) values.
-
+    :param polygons: List of ColorPolygons to draw onto the image.
     """
-    # Create a transparent overlay
+
     overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))  # Transparent overlay
     draw = ImageDraw.Draw(overlay)
 
-    # Draw polygon with fill and outline
-    for polygon in points:
-        draw.polygon(polygon, fill=color, outline="black")
+    for polygon in polygons:
+        draw.polygon(polygon.points(), fill=polygon.color, outline="black")
 
-    # Use 'paste' for direct compositing if no transparency in color
-    if color[3] == 255:  # Fully opaque fill
-        canvas.paste(overlay, (0, 0), overlay)
-        return canvas
-
-    # Otherwise, use alpha_composite
     return Image.alpha_composite(canvas, overlay)
 
 

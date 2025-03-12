@@ -1,4 +1,4 @@
-from shapely.geometry.multipolygon import MultiPolygon
+from dynmap_bot_core.engine.colorpolygon import ColorPolygon, ColorMultiPolygon
 from shapely.geometry import Polygon
 
 from dynmap_bot_core.engine.chunk import Chunk
@@ -60,7 +60,7 @@ class TestTownMethods:
 
         result = town.as_polygon()
 
-        assert isinstance(result, MultiPolygon)
+        assert isinstance(result, ColorMultiPolygon)
 
     def test_get_regions(self) -> None:
         coord = Chunk(1, 0, 1)
@@ -108,7 +108,7 @@ class TestMapMethods:
 
         assert isinstance(result, list)
         for i in result:
-            assert isinstance(i, Polygon)
+            assert isinstance(i, ColorPolygon)
 
     def test_get_normalised_town_polygons(self) -> None:
         coord = Chunk(1, 0, 1)

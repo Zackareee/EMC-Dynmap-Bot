@@ -1,13 +1,14 @@
 from shapely.geometry import Polygon, MultiPolygon
-from shapely.ops import unary_union
+from PIL import ImageColor
+from dynmap_bot_core.engine.chunk import Chunk
 
 
 class ColorPolygon:
     """A Polygon with an additional color attribute."""
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, color, *args, **kwargs):
         self._polygon = Polygon(*args, **kwargs)
-        self._color = None  # Store color internally as an RGB tuple
+        self._color = color  # Store color internally as an RGB tuple
 
     def __getattr__(self, name):
         """Delegate attribute access to the internal Polygon object."""
@@ -21,12 +22,24 @@ class ColorPolygon:
             super().__setattr__(name, value)
         else:
             raise AttributeError(
-                f"'{self.__class__.__name__}' object does not support attribute assignment for '{name}'")
+                f"'{self.__class__.__name__}' object does not support attribute assignment for '{name}'"
+            )
 
     @property
     def color(self):
         """Return the stored color as an RGB tuple."""
         return self._color
+
+    @property
+    def rgbcolor(self):
+        """Return the stored color as an RGB tuple."""
+        return ImageColor.getcolor(self._color, "RGB")
+
+    def points(self):
+        polygon_coords: list[list[int]] = [
+            [int(x), int(z)] for x, z in self._polygon.exterior.coords
+        ]
+        return list(tuple(a + 8 for a in sub) for sub in polygon_coords)
 
 
 class ColorMultiPolygon:
@@ -34,7 +47,9 @@ class ColorMultiPolygon:
 
     def __init__(self, colored_polygons):
         if not all(isinstance(p, ColorPolygon) for p in colored_polygons):
-            raise TypeError("All elements of ColorMultiPolygon must be instances of ColorPolygon")
+            raise TypeError(
+                "All elements of ColorMultiPolygon must be instances of ColorPolygon"
+            )
 
         self._colored_polygons = colored_polygons  # Preserve ColorPolygon instances
 
@@ -58,7 +73,9 @@ class ColorMultiPolygon:
     def add(self, color_polygon):
         """Add a new ColorPolygon to the collection."""
         if not isinstance(color_polygon, ColorPolygon):
-            raise TypeError("Only ColorPolygon instances can be added to ColorMultiPolygon")
+            raise TypeError(
+                "Only ColorPolygon instances can be added to ColorMultiPolygon"
+            )
         self._colored_polygons.append(color_polygon)
 
 
@@ -66,7 +83,7 @@ from shapely.ops import unary_union
 
 
 def colored_unary_union(colored_polygons):
-    """Wrapper for unary_union that returns a ColorPolygon or ColorMultiPolygon while preserving colors."""
+    """Wrapper for unary_union that always returns a ColorMultiPolygon while preserving colors."""
     if not colored_polygons:
         return None  # If input list is empty, return None
 
@@ -76,26 +93,37 @@ def colored_unary_union(colored_polygons):
     # Perform unary union
     result = unary_union(polygons)
 
-    # If the result is a single Polygon, return a ColorPolygon with the first color
-    if isinstance(result, Polygon):
-        colored_result = ColorPolygon(result.exterior.coords)
-        colored_result.color = colored_polygons[0].color  # Use first polygon's color
-        return colored_result
+    # Ensure the result is always a ColorMultiPolygon
+    new_colored_polygons = []
 
-    # If the result is a MultiPolygon, reconstruct a ColorMultiPolygon with correct colors
+    if isinstance(result, Polygon):
+        # Wrap single Polygon inside a ColorMultiPolygon
+        colored_sub_polygon = ColorPolygon(
+            colored_polygons[0].color,  # First argument is now the color
+            result.exterior.coords,
+        )
+        new_colored_polygons.append(colored_sub_polygon)
+
     elif isinstance(result, MultiPolygon):
-        new_colored_polygons = []
         for sub_polygon in result.geoms:
-            # Find the original color from the input polygons (naive approach: first matching polygon)
-            matching_color = next((cp.color for cp in colored_polygons if
-                                   cp._polygon.contains(sub_polygon) or cp._polygon.equals(sub_polygon)), None)
+            # Find original color from the input polygons
+            matching_color = next(
+                (
+                    cp.color
+                    for cp in colored_polygons
+                    if cp._polygon.intersects(sub_polygon)
+                ),
+                colored_polygons[0].color,  # Fallback: Use the first polygon's color
+            )
 
             # Create a new ColorPolygon with the original color
-            colored_sub_polygon = ColorPolygon(sub_polygon.exterior.coords)
-            colored_sub_polygon.color = matching_color
+            colored_sub_polygon = ColorPolygon(
+                matching_color,  # First argument is now the color
+                sub_polygon.exterior.coords,
+            )
             new_colored_polygons.append(colored_sub_polygon)
-
-        return ColorMultiPolygon(new_colored_polygons)
 
     else:
         raise TypeError("Unexpected result from unary_union")
+
+    return ColorMultiPolygon(new_colored_polygons)
