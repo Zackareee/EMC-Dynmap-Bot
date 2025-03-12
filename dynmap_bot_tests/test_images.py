@@ -25,8 +25,6 @@ class TestCropMapAndImage(TestBase):
         map_obj: Map = misc.build_nation(nation_name="France")
         image_obj: Image = misc.build_image_with_map(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
-        cropped_image.show()
-        expected_image.show()
         self.assert_images(cropped_image, expected_image)
 
     def test_crop_with_town_on_region_border(self) -> None:

@@ -1,27 +1,11 @@
 __all__ = ["Town"]
 from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.coordinate import Coordinate
-from shapely.geometry import Polygon, MultiPolygon
 from dynmap_bot_core.engine.colorpolygon import (
     ColorPolygon,
     ColorMultiPolygon,
     colored_unary_union,
 )
-from shapely.ops import unary_union
-
-
-def ensure_multipolygon(geometry: Polygon | MultiPolygon) -> MultiPolygon:
-    """
-     Convert a Polygon to a MultiPolygon if it isn't one already.
-    :param geometry: A possible Polygon or Multipolygon.
-    :return:
-    """
-    if isinstance(geometry, Polygon):
-        return MultiPolygon([geometry])
-    elif isinstance(geometry, MultiPolygon):
-        return geometry
-    else:
-        raise TypeError("Input geometry must be a Polygon or MultiPolygon.")
 
 
 class Town:
@@ -64,7 +48,7 @@ class Town:
             x=max(c.x for c in self.chunks), y=0, z=max(c.z for c in self.chunks)
         )
 
-    def as_polygon(self) -> MultiPolygon:
+    def as_polygon(self) -> ColorMultiPolygon:
         """
         Returns the town as a MultiPolygon object where the bounds of the polygon(s) are the border(s) of the town.
         :return:

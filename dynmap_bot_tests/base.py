@@ -11,6 +11,7 @@ import numpy as np
 
 class TestBase:
     """Base test class that provides common assertions."""
+
     TESTDIR = os.path.dirname(os.path.realpath(__file__))
 
     def assert_images(self, cropped_image, expected_image):
@@ -55,5 +56,3 @@ class TestBase:
                 "download_town": mock_town,
                 "download_nation": mock_nation,
             }
-
-

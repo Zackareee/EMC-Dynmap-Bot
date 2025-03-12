@@ -4,6 +4,7 @@ from dynmap_bot_core.engine.town import Town
 
 from dynmap_bot_tests.base import TestBase
 
+
 class TestBuildMap(TestBase):
     def test_build_map_returns_map_instance(self):
         town_names = ["Sanctuary", "Gulf_Of_Guinea"]
@@ -26,7 +27,6 @@ class TestBuildMap(TestBase):
 
         for town in map_obj.towns:
             assert isinstance(town, Town)
-
 
     def test_get_regions(self):
         map_obj: Map = misc.build_map(town_names=["Sanctuary", "Gulf_Of_Guinea"])
