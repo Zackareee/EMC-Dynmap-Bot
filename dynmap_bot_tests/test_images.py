@@ -14,8 +14,7 @@ class TestCropMapAndImage(TestBase):
         map_obj: Map = misc.build_map(town_names=["Sanctuary", "Gulf_Of_Guinea"])
         image_obj: Image = misc.build_image_with_map(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
-        expected_image.show()
-        cropped_image.show()
+
         self.assert_images(cropped_image, expected_image)
 
     def test_crop_with_nation_france(self) -> None:
@@ -26,6 +25,18 @@ class TestCropMapAndImage(TestBase):
         map_obj: Map = misc.build_nations(nation_names=["France"])
         image_obj: Image = misc.build_image_with_map(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
+
+        self.assert_images(cropped_image, expected_image)
+
+    def test_crop_with_nation_colors(self) -> None:
+        expected_image = Image.open(
+            f"{self.TESTDIR}/snapshots/test_crop_with_nation_netherlands.png"
+        )
+
+        map_obj: Map = misc.build_nations(nation_names=["Netherlands"])
+        image_obj: Image = misc.build_image_with_map(map_obj)
+        cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
+
         self.assert_images(cropped_image, expected_image)
 
     def test_crop_with_town_on_region_border(self) -> None:
@@ -48,7 +59,6 @@ class TestBuildImageWithMap(TestBase):
 
         map_obj: Map = misc.build_map(town_names=["Sanctuary", "Gulf_Of_Guinea"])
         image_obj: Image = misc.build_image_with_map(map_obj)
-
         self.assert_images(image_obj, expected_image)
 
     def test_build_map_with_nation_france(self) -> None:
