@@ -12,7 +12,7 @@ class Town:
     def __init__(self, chunks):
         self.chunks: [Chunk] = chunks
         self.color: str = "03D7FC"
-        self.nation_name: str = None
+        self.nation_name: str | None = None
 
     def offset_chunks(self, x, y, z) -> None:
         """
@@ -34,9 +34,9 @@ class Town:
         """
         padding: int = Chunk.SIZE
         return Coordinate(
-            x=min(c.x for c in self.chunks) - padding,
+            x=min(chunk.x for chunk in self.chunks) - padding,
             y=0,
-            z=min(c.z for c in self.chunks) - padding,
+            z=min(chunk.z for chunk in self.chunks) - padding,
         )
 
     def get_polygon_bottom_right_corner(self) -> Coordinate:
@@ -47,29 +47,31 @@ class Town:
         :return:
         """
         return Coordinate(
-            x=max(c.x for c in self.chunks), y=0, z=max(c.z for c in self.chunks)
+            x=max(chunk.x for chunk in self.chunks),
+            y=0,
+            z=max(chunk.z for chunk in self.chunks),
         )
 
     def as_polygon(self, color: str) -> ColorMultiPolygon:
         """
         Returns the town as a MultiPolygon object where the bounds of the polygon(s) are the border(s) of the town.
+        Sets the color to 50% opacity (#??????7F)
         :return:
         """
         padding = Chunk.SIZE / 2
-        unary_polygon = colored_unary_union(
-            [
-                ColorPolygon(
-                    f"{color}7F",
-                    [
-                        (c.x - padding, c.z - padding),
-                        (c.x - padding, c.z + padding),
-                        (c.x + padding, c.z + padding),
-                        (c.x + padding, c.z - padding),
-                    ],
-                )
-                for c in self.chunks
-            ]
-        )
+        polygons: [ColorPolygon] = [
+            ColorPolygon(
+                f"{color}7F",
+                [
+                    (chunk.x - padding, chunk.z - padding),
+                    (chunk.x - padding, chunk.z + padding),
+                    (chunk.x + padding, chunk.z + padding),
+                    (chunk.x + padding, chunk.z - padding),
+                ],
+            )
+            for chunk in self.chunks
+        ]
+        unary_polygon: ColorMultiPolygon = colored_unary_union(polygons)
         return unary_polygon
 
     def get_regions(self) -> set[Coordinate]:
