@@ -1,4 +1,4 @@
-__all__ = ["build_map", "build_town", "build_image_with_map"]
+__all__ = ["build_map", "build_towns", "build_image_with_map"]
 from dynmap_bot_core.engine.town import Town
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.chunk import Chunk
@@ -22,16 +22,18 @@ def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
 
 # TODO build an abstraction on town so nations and towns can be mixed - Maybe a bad idea since a town and nation can
 #  have the same name
-def build_town(town_name: str) -> Town:
+def build_towns(town_names: [str]) -> [Town]:
     """
     Returns a town object given the town name.
-    :param town_name:
+    :param town_names:
     :return:
     """
-    town: list[list[int, int]] = unpack_town_coordinates(
-        common.download_town(town_name)
-    )
-    return Town([Chunk(x, 0, z) for x, z in town[0]])
+    towns_json = common.download_towns(town_names)
+    result = []
+    for t in towns_json:
+        coordinates = unpack_town_coordinates(t)
+        result.append(Town([Chunk(x, 0, z) for x, z in coordinates[0]]))
+    return result
 
 
 def build_nation(nation_name: str) -> Nation:
@@ -42,7 +44,7 @@ def build_nation(nation_name: str) -> Nation:
     """
     town_names_dict = common.download_nation(nation_name)["towns"]
     town_names = [item["name"] for item in town_names_dict]
-    towns = [build_town(town) for town in town_names]
+    towns = build_towns(town_names)
     return Nation(towns)
 
 
@@ -52,7 +54,7 @@ def build_map(town_names: list[str]) -> Map:
     :param town_names:
     :return:
     """
-    towns = [build_town(town) for town in town_names]
+    towns = build_towns(town_names)
     return Map(towns)
 
 

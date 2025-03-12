@@ -25,11 +25,14 @@ class TestBase:
             f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png"
         )
 
-    def download_town(self, town_name):
-        with open(
-            f"{os.path.dirname(os.path.realpath(__file__))}/json/town/{common.sanitize_filename(town_name)}.json"
-        ) as f:
-            return json.load(f)[0]
+    def download_town(self, town_names: list[str]):
+        result = []
+        for town in town_names:
+            with open(
+                f"{os.path.dirname(os.path.realpath(__file__))}/json/town/{common.sanitize_filename(town)}.json"
+            ) as f:
+                result.append(json.load(f)[0])
+        return result
 
     def download_nation(self, nation_name):
         with io.open(
@@ -45,7 +48,7 @@ class TestBase:
             "dynmap_bot_core.download.download.download_map_image",
             side_effect=self.download_map_image,
         ) as mock_map, patch(
-            "dynmap_bot_core.download.common.download_town",
+            "dynmap_bot_core.download.common.download_towns",
             side_effect=self.download_town,
         ) as mock_town, patch(
             "dynmap_bot_core.download.common.download_nation",
@@ -53,6 +56,6 @@ class TestBase:
         ) as mock_nation:
             yield {
                 "download_map_image": mock_map,
-                "download_town": mock_town,
+                "download_towns": mock_town,
                 "download_nation": mock_nation,
             }
