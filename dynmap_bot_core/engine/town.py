@@ -11,6 +11,8 @@ from dynmap_bot_core.engine.colorpolygon import (
 class Town:
     def __init__(self, chunks):
         self.chunks: [Chunk] = chunks
+        self.color: str = "03D7FC"
+        self.nation_name: str = None
 
     def offset_chunks(self, x, y, z) -> None:
         """
@@ -48,7 +50,7 @@ class Town:
             x=max(c.x for c in self.chunks), y=0, z=max(c.z for c in self.chunks)
         )
 
-    def as_polygon(self) -> ColorMultiPolygon:
+    def as_polygon(self, color: str) -> ColorMultiPolygon:
         """
         Returns the town as a MultiPolygon object where the bounds of the polygon(s) are the border(s) of the town.
         :return:
@@ -57,7 +59,7 @@ class Town:
         unary_polygon = colored_unary_union(
             [
                 ColorPolygon(
-                    "#03D7FC7F",
+                    f"{color}7F",
                     [
                         (c.x - padding, c.z - padding),
                         (c.x - padding, c.z + padding),

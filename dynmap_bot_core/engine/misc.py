@@ -30,9 +30,23 @@ def build_towns(town_names: [str]) -> [Town]:
     """
     towns_json = common.download_towns(town_names)
     result = []
+    nations = set()
+
     for t in towns_json:
         coordinates = unpack_town_coordinates(t)
-        result.append(Town([Chunk(x, 0, z) for x, z in coordinates[0]]))
+        town = Town([Chunk(x, 0, z) for x, z in coordinates[0]])
+        town.nation_name = t["nation"]["name"]
+        if town.nation_name is not None:
+            nations.add(town.nation_name)
+        result.append(town)
+
+    nations_json = common.download_nations(list(nations))
+    nations_dict: dict = {nation["name"]: nation for nation in nations_json}
+
+    for town in result:
+        if town.nation_name:
+            town.color = nations_dict[town.nation_name]["dynmapColour"]
+
     return result
 
 

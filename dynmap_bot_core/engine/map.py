@@ -2,6 +2,7 @@ __all__ = ["Map"]
 from dynmap_bot_core.engine.coordinate import Coordinate
 from dynmap_bot_core.engine.town import Town
 from dynmap_bot_core.engine.chunk import Chunk
+from dynmap_bot_core.engine.colorpolygon import ColorPolygon
 from shapely.geometry import Polygon
 
 
@@ -62,7 +63,7 @@ class Map:
         return [
             polygon
             for multi_polygon in self.towns
-            for polygon in multi_polygon.as_polygon().geoms
+            for polygon in multi_polygon.as_polygon(f"#{multi_polygon.color}").geoms
         ]
 
     def get_region_offset(self) -> list[int]:

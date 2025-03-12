@@ -58,7 +58,7 @@ class TestTownMethods:
         coord = Chunk(1, 0, 1)
         town = Town([coord])
 
-        result = town.as_polygon()
+        result = town.as_polygon(town.color)
 
         assert isinstance(result, ColorMultiPolygon)
 

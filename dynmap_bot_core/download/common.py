@@ -26,7 +26,7 @@ def download_nations(name: [str]) -> dict:
     """
     url: str = "https://api.earthmc.net/v3/aurora/nations"
     x: requests.Response = requests.post(url, json={"query": name})
-    nation: dict = json.loads(x.text)[0]
+    nation: dict = json.loads(x.text)
     return nation
 
 
