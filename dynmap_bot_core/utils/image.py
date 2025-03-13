@@ -7,9 +7,9 @@ __all__ = [
 ]
 
 from PIL import Image, ImageDraw
-from dynmap_bot_core.engine.chunk import Chunk
-from dynmap_bot_core.engine.map import Map
-from dynmap_bot_core.engine.coordinate import Coordinate
+from dynmap_bot_core.models.spatial.chunk import Chunk
+from dynmap_bot_core.models.spatial.map import Map
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
 from shapely.geometry import Polygon
 
 
@@ -32,9 +32,7 @@ def stitch_images(images: dict[tuple[int, int], Image]) -> Image:
     canvas_height: int = (max_z - min_z + 1) * TILESIZE
 
     # Create a blank canvas with a white background
-    canvas: Image = Image.new(
-        mode="RGBA", size=(canvas_width, canvas_height), color="white"
-    )
+    canvas: Image = Image.new(mode="RGBA", size=(canvas_width, canvas_height), color="white")
 
     # Place images on the canvas
     for (x, y), img in images.items():

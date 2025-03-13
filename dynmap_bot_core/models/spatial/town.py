@@ -1,7 +1,7 @@
 __all__ = ["Town"]
-from dynmap_bot_core.engine.chunk import Chunk
-from dynmap_bot_core.engine.coordinate import Coordinate
-from dynmap_bot_core.engine.colorpolygon import (
+from dynmap_bot_core.models.spatial.chunk import Chunk
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
+from dynmap_bot_core.models.color_polygon import (
     ColorPolygon,
     ColorMultiPolygon,
     colored_unary_union,

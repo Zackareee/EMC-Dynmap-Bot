@@ -1,5 +1,5 @@
 from PIL import ImageChops
-from dynmap_bot_core.engine import misc
+from dynmap_bot_core.utils import misc
 import pytest
 from unittest.mock import patch
 from PIL import Image
@@ -21,9 +21,7 @@ class TestBase:
         assert np.all(diff_array == 0), "Images do not match!"
 
     def download_map_image(self, x: int, z: int):
-        return Image.open(
-            f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png"
-        )
+        return Image.open(f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png")
 
     def download_town(self, town_names: list[str]):
         result = []
@@ -48,13 +46,13 @@ class TestBase:
     @pytest.fixture(autouse=True)
     def mocked_downloads(self):
         with patch(
-            "dynmap_bot_core.download.download.download_map_image",
+            "dynmap_bot_core.services.download.download_map_image",
             side_effect=self.download_map_image,
         ) as mock_map, patch(
-            "dynmap_bot_core.download.download.download_towns",
+            "dynmap_bot_core.services.download.download_towns",
             side_effect=self.download_town,
         ) as mock_town, patch(
-            "dynmap_bot_core.download.download.download_nations",
+            "dynmap_bot_core.services.download.download_nations",
             side_effect=self.download_nation,
         ) as mock_nation:
             yield {

@@ -1,40 +1,15 @@
-__all__ = ["build_map", "build_towns", "build_map_image"]
-from dynmap_bot_core.engine.town import Town
-from dynmap_bot_core.engine.map import Map
-from dynmap_bot_core.engine.chunk import Chunk
-from dynmap_bot_core.engine.nation import Nation
-from dynmap_bot_core.engine.coordinate import Coordinate
-from dynmap_bot_core.download import download
-from dynmap_bot_core.images import image as img
+__all__ = ["build_map", "build_towns", "build_nations", "build_map_image"]
+from dynmap_bot_core.models.spatial.town import Town
+from dynmap_bot_core.models.spatial.map import Map
+from dynmap_bot_core.models.spatial.chunk import Chunk
+from dynmap_bot_core.models.spatial.nation import Nation
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
+from dynmap_bot_core.services import download
+from dynmap_bot_core.utils import image, misc
+
 from PIL import Image
-import urllib.parse
 
 
-def sanitize_filename(filename: str) -> str:
-    """
-    Serves as a helper function for tests to sanitize a filename to meet the windows filename requirements.
-    Use urllib.parse.unquote(str) to recover the filename.
-    :param filename:
-    :return:
-    """
-    safe_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.() "
-    sanitized = urllib.parse.quote(filename, safe=safe_chars)
-    sanitized = sanitized.rstrip(" .")
-    return sanitized
-
-
-def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
-    """
-    Given a dictionary of a town object, return all coordinates
-    :param town_json: Town object as a dictionary.
-    :return: list of ints for all coordinates.
-    """
-    coordinates: list[list[int, int]] = [town_json["coordinates"]["townBlocks"]]
-    return coordinates
-
-
-# TODO build an abstraction on town so nations and towns can be mixed - Maybe a bad idea since a town and nation can
-#  have the same name
 def build_towns(town_names: [str]) -> [Town]:
     """
     Returns a town object given the town name.
@@ -46,7 +21,7 @@ def build_towns(town_names: [str]) -> [Town]:
     nations = set()
 
     for t in towns_json:
-        coordinates = unpack_town_coordinates(t)
+        coordinates = misc.unpack_town_coordinates(t)
         town = Town([Chunk(x, 0, z) for x, z in coordinates[0]])
         town.nation_name = t["nation"]["name"]
         if town.nation_name is not None:
@@ -101,8 +76,8 @@ def build_map_image(map_obj: Map) -> Image:
     map_obj.offset_towns(-Chunk.SIZE, 0, -Chunk.SIZE)
     map_obj.offset_towns(offset[0], 0, offset[1])
     image_data = download.map_images_as_dict(map_regions)
-    image: Image = img.stitch_images(image_data)
+    map_image: Image = image.stitch_images(image_data)
 
-    image = img.draw_polygons_on_image(map_obj.get_town_polygons(), image)
+    map_image = image.draw_polygons_on_image(map_obj.get_town_polygons(), map_image)
 
-    return image
+    return map_image

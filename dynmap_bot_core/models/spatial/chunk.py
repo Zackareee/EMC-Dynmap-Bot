@@ -1,6 +1,7 @@
 __all__ = ["Chunk"]
-from dynmap_bot_core.engine import coordinate
-from dynmap_bot_core.engine.colorpolygon import ColorPolygon
+
+from dynmap_bot_core.models.spatial import coordinate
+from dynmap_bot_core.models.color_polygon import ColorPolygon
 
 
 class Chunk(coordinate.Coordinate):

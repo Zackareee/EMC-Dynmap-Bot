@@ -1,3 +1,4 @@
+__all__ = ["ColorPolygon", "ColorMultiPolygon", "colored_unary_union"]
 from shapely.geometry import Polygon, MultiPolygon
 from shapely.ops import unary_union
 
@@ -39,9 +40,7 @@ class ColorMultiPolygon:
 
     def __init__(self, colored_polygons: [ColorPolygon]) -> None:
         if not all(isinstance(p, ColorPolygon) for p in colored_polygons):
-            raise TypeError(
-                "All elements of ColorMultiPolygon must be instances of ColorPolygon"
-            )
+            raise TypeError("All elements of ColorMultiPolygon must be instances of ColorPolygon")
 
         self._colored_polygons = colored_polygons  # Preserve ColorPolygon instances
 
@@ -65,9 +64,7 @@ class ColorMultiPolygon:
     def add(self, color_polygon: ColorPolygon) -> None:
         """Add a new ColorPolygon to the collection."""
         if not isinstance(color_polygon, ColorPolygon):
-            raise TypeError(
-                "Only ColorPolygon instances can be added to ColorMultiPolygon"
-            )
+            raise TypeError("Only ColorPolygon instances can be added to ColorMultiPolygon")
         self._colored_polygons.append(color_polygon)
 
 
@@ -100,11 +97,7 @@ def colored_unary_union(
     elif isinstance(result, MultiPolygon):
         for sub_polygon in result.geoms:
             matching_color: str = next(
-                (
-                    cp.color
-                    for cp in colored_polygons
-                    if cp._polygon.intersects(sub_polygon)
-                ),
+                (cp.color for cp in colored_polygons if cp._polygon.intersects(sub_polygon)),
                 colored_polygons[0].color,
             )
 
