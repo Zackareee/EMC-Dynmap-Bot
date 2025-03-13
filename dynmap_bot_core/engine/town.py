@@ -1,27 +1,18 @@
 __all__ = ["Town"]
 from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.coordinate import Coordinate
-from shapely.geometry import Polygon, MultiPolygon
-from shapely.ops import unary_union
-
-
-def ensure_multipolygon(geometry: Polygon | MultiPolygon) -> MultiPolygon:
-    """
-     Convert a Polygon to a MultiPolygon if it isn't one already.
-    :param geometry: A possible Polygon or Multipolygon.
-    :return:
-    """
-    if isinstance(geometry, Polygon):
-        return MultiPolygon([geometry])
-    elif isinstance(geometry, MultiPolygon):
-        return geometry
-    else:
-        raise TypeError("Input geometry must be a Polygon or MultiPolygon.")
+from dynmap_bot_core.engine.colorpolygon import (
+    ColorPolygon,
+    ColorMultiPolygon,
+    colored_unary_union,
+)
 
 
 class Town:
     def __init__(self, chunks):
         self.chunks: [Chunk] = chunks
+        self.color: str = "03D7FC"
+        self.nation_name: str | None = None
 
     def offset_chunks(self, x, y, z) -> None:
         """
@@ -43,9 +34,9 @@ class Town:
         """
         padding: int = Chunk.SIZE
         return Coordinate(
-            x=min(c.x for c in self.chunks) - padding,
+            x=min(chunk.x for chunk in self.chunks) - padding,
             y=0,
-            z=min(c.z for c in self.chunks) - padding,
+            z=min(chunk.z for chunk in self.chunks) - padding,
         )
 
     def get_polygon_bottom_right_corner(self) -> Coordinate:
@@ -56,29 +47,19 @@ class Town:
         :return:
         """
         return Coordinate(
-            x=max(c.x for c in self.chunks), y=0, z=max(c.z for c in self.chunks)
+            x=max(chunk.x for chunk in self.chunks),
+            y=0,
+            z=max(chunk.z for chunk in self.chunks),
         )
 
-    def as_polygon(self) -> MultiPolygon:
+    def as_polygon(self, color: str) -> ColorMultiPolygon:
         """
         Returns the town as a MultiPolygon object where the bounds of the polygon(s) are the border(s) of the town.
         :return:
         """
-        padding = Chunk.SIZE / 2
-        unary_polygon = unary_union(
-            [
-                Polygon(
-                    [
-                        (c.x - padding, c.z - padding),
-                        (c.x - padding, c.z + padding),
-                        (c.x + padding, c.z + padding),
-                        (c.x + padding, c.z - padding),
-                    ]
-                )
-                for c in self.chunks
-            ]
-        )
-        return ensure_multipolygon(unary_polygon)
+        polygons: [ColorPolygon] = [chunk.as_polygon(color) for chunk in self.chunks]
+        unary_polygon: ColorMultiPolygon = colored_unary_union(polygons)
+        return unary_polygon
 
     def get_regions(self) -> set[Coordinate]:
         """

@@ -2,7 +2,7 @@ __all__ = ["Map"]
 from dynmap_bot_core.engine.coordinate import Coordinate
 from dynmap_bot_core.engine.town import Town
 from dynmap_bot_core.engine.chunk import Chunk
-from shapely.geometry import Polygon
+from dynmap_bot_core.engine.colorpolygon import ColorMultiPolygon
 
 
 class Map:
@@ -54,16 +54,16 @@ class Map:
         offset_z = self.get_polygon_top_left_corner().z
         return self.offset_towns(-offset_x, 0, -offset_z)
 
-    def get_town_polygons(self) -> list[Polygon]:
+    def get_town_polygons(self) -> list[ColorMultiPolygon]:
         """
         Returns the polygons for each town.
         :return:
         """
-        return [
-            polygon
-            for multi_polygon in self.towns
-            for polygon in multi_polygon.as_polygon().geoms
-        ]
+        map_polygons: list[ColorMultiPolygon] = []
+        for town in self.towns:
+            town_polygons: ColorMultiPolygon = town.as_polygon(color=f"#{town.color}").geoms
+            map_polygons += town_polygons
+        return map_polygons
 
     def get_region_offset(self) -> list[int]:
         """
