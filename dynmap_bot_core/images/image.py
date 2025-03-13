@@ -1,6 +1,6 @@
 __all__ = [
-    "make_image_collage",
-    "make_grids_on_collage",
+    "stitch_images",
+    "draw_polygons_on_image",
     "draw_polygons_on_image",
     "crop_image",
     "resize_image",
@@ -8,13 +8,12 @@ __all__ = [
 
 from PIL import Image, ImageDraw
 from dynmap_bot_core.engine.chunk import Chunk
-from dynmap_bot_core.engine.colorpolygon import ColorPolygon
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.coordinate import Coordinate
 from shapely.geometry import Polygon
 
 
-def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
+def stitch_images(images: dict[tuple[int, int], Image]) -> Image:
     """
     Collates all images in a dictionary into a single image, placing them at their corresponding coordinate.
     :param images: A dictionary of image coordinates to image.
@@ -45,28 +44,14 @@ def make_image_collage(images: dict[tuple[int, int], Image]) -> Image:
     return canvas
 
 
-def make_grids_on_collage(polygons: [Polygon], canvas: Image) -> Image:
-    """
-    Draws polygons onto an Image object, returning the modified Image.
-    TODO consider refactoring this method, the types are unpleasant. ALSO rename this method
-    :param polygons:
-    :param canvas:
-    :return:
-    """
-
-    canvas: Image = draw_polygons_on_image(canvas, polygons)
-
-    return canvas
-
-
-def draw_polygons_on_image(canvas: Image, polygons: [ColorPolygon]):
+def draw_polygons_on_image(polygons: [Polygon], canvas: Image) -> Image:
     """
     Draws a filled polygon on the canvas with transparency.
     :param canvas: The canvas Image object.
     :param polygons: List of ColorPolygons to draw onto the image.
     """
 
-    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))  # Transparent overlay
+    overlay = Image.new("RGBA", canvas.size, (255, 255, 255, 0))
     draw = ImageDraw.Draw(overlay)
 
     for polygon in polygons:

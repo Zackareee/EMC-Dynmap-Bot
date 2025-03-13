@@ -1,4 +1,4 @@
-__all__ = ["build_map", "build_towns", "build_image_with_map"]
+__all__ = ["build_map", "build_towns", "build_map_image"]
 from dynmap_bot_core.engine.town import Town
 from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.chunk import Chunk
@@ -38,7 +38,7 @@ def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
 def build_towns(town_names: [str]) -> [Town]:
     """
     Returns a town object given the town name.
-    :param town_names:
+    :param town_names: a list of town names
     :return:
     """
     towns_json = download.download_towns(town_names)
@@ -66,7 +66,7 @@ def build_towns(town_names: [str]) -> [Town]:
 def build_nations(nation_names: [str]) -> Nation:
     """
     Returns a town object given the town name.
-    :param nation_name:
+    :param nation_names: a list of nation names
     :return:
     """
     nations_json = download.download_nations(nation_names)
@@ -89,10 +89,9 @@ def build_map(town_names: list[str]) -> Map:
     return Map(towns)
 
 
-def build_image_with_map(map_obj: Map) -> Image:
+def build_map_image(map_obj: Map) -> Image:
     """
     Prepares the map object, aligns polygons as needed, downloads images, and overlays polygons ontop. Lots going on.
-    TODO refactor this - the current setup will not work with nations
     :param map_obj: a map object
     :return: an Image object with the polygon overlayed ontop of the background
     """
@@ -102,8 +101,8 @@ def build_image_with_map(map_obj: Map) -> Image:
     map_obj.offset_towns(-Chunk.SIZE, 0, -Chunk.SIZE)
     map_obj.offset_towns(offset[0], 0, offset[1])
     image_data = download.map_images_as_dict(map_regions)
-    image: Image = img.make_image_collage(image_data)
+    image: Image = img.stitch_images(image_data)
 
-    image = img.make_grids_on_collage(map_obj.get_town_polygons(), image)
+    image = img.draw_polygons_on_image(map_obj.get_town_polygons(), image)
 
     return image

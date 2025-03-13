@@ -12,7 +12,7 @@ class TestCropMapAndImage(TestBase):
         )
 
         map_obj: Map = misc.build_map(town_names=["Sanctuary", "Gulf_Of_Guinea"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
 
         self.assert_images(cropped_image, expected_image)
@@ -23,7 +23,7 @@ class TestCropMapAndImage(TestBase):
         )
 
         map_obj: Map = misc.build_nations(nation_names=["France"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
 
         self.assert_images(cropped_image, expected_image)
@@ -34,7 +34,7 @@ class TestCropMapAndImage(TestBase):
         )
 
         map_obj: Map = misc.build_nations(nation_names=["Netherlands"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
 
         self.assert_images(cropped_image, expected_image)
@@ -45,7 +45,7 @@ class TestCropMapAndImage(TestBase):
         )
 
         map_obj: Map = misc.build_map(town_names=["Limerick"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
 
         self.assert_images(cropped_image, expected_image)
@@ -58,7 +58,7 @@ class TestBuildImageWithMap(TestBase):
         )
 
         map_obj: Map = misc.build_map(town_names=["Sanctuary", "Gulf_Of_Guinea"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
         self.assert_images(image_obj, expected_image)
 
     def test_build_map_with_nation_france(self) -> None:
@@ -67,7 +67,7 @@ class TestBuildImageWithMap(TestBase):
         )
 
         map_obj: Map = misc.build_nations(nation_names=["France"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
 
         self.assert_images(image_obj, expected_image)
 
@@ -77,6 +77,6 @@ class TestBuildImageWithMap(TestBase):
         )
 
         map_obj: Map = misc.build_map(town_names=["Limerick"])
-        image_obj: Image = misc.build_image_with_map(map_obj)
+        image_obj: Image = misc.build_map_image(map_obj)
 
         self.assert_images(image_obj, expected_image)
