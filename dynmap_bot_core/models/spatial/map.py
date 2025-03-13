@@ -1,8 +1,8 @@
 __all__ = ["Map"]
-from dynmap_bot_core.engine.coordinate import Coordinate
-from dynmap_bot_core.engine.town import Town
-from dynmap_bot_core.engine.chunk import Chunk
-from dynmap_bot_core.engine.colorpolygon import ColorMultiPolygon
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
+from dynmap_bot_core.models.spatial.town import Town
+from dynmap_bot_core.models.spatial.chunk import Chunk
+from dynmap_bot_core.models.color_polygon import ColorMultiPolygon
 
 
 class Map:

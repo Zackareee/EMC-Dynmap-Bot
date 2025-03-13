@@ -1,5 +1,5 @@
 __all__ = ["Nation"]
-from dynmap_bot_core.engine.map import Map
+from dynmap_bot_core.models.spatial.map import Map
 
 
 class Nation(Map):

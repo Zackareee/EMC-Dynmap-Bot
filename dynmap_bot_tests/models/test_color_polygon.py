@@ -1,33 +1,31 @@
 import pytest
 from shapely.geometry import Polygon
-from dynmap_bot_core.engine.colorpolygon import (
+from dynmap_bot_core.models.color_polygon import (
     ColorPolygon,
     ColorMultiPolygon,
     colored_unary_union,
 )
 
 
-def test_coloredpolygon_instantiation():
+def test_instantiation():
     poly = ColorPolygon("#FFFFFF", [(0, 0), (1, 1), (1, 0)])
     assert isinstance(poly, ColorPolygon)
     assert isinstance(poly._polygon, Polygon)
     assert poly.area == Polygon([(0, 0), (1, 1), (1, 0)]).area
 
 
-def test_coloredpolygon_coordinates():
+def test_coordinates():
     poly = ColorPolygon("#FFFFFF", [(0, 0), (1, 1), (1, 0)])
-    assert list(poly.exterior.coords) == list(
-        Polygon([(0, 0), (1, 1), (1, 0)]).exterior.coords
-    )
+    assert list(poly.exterior.coords) == list(Polygon([(0, 0), (1, 1), (1, 0)]).exterior.coords)
 
 
-def test_coloredpolygon_polygon_methods():
+def test_polygon_methods():
     poly = ColorPolygon("#FFFFFF", [(0, 0), (1, 1), (1, 0)])
     assert poly.area == Polygon([(0, 0), (1, 1), (1, 0)]).area
     assert poly.bounds == Polygon([(0, 0), (1, 1), (1, 0)]).bounds
 
 
-def test_coloredpolygon_immutable():
+def test_immutability():
     poly = ColorPolygon("#FFFFFF", [(0, 0), (1, 1), (1, 0)])
 
     with pytest.raises(AttributeError):

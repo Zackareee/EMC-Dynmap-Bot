@@ -1,10 +1,9 @@
-from dynmap_bot_core.engine.colorpolygon import ColorPolygon, ColorMultiPolygon
-from shapely.geometry import Polygon
+from dynmap_bot_core.models.color_polygon import ColorPolygon, ColorMultiPolygon
 
-from dynmap_bot_core.engine.chunk import Chunk
-from dynmap_bot_core.engine.coordinate import Coordinate
-from dynmap_bot_core.engine.town import Town
-from dynmap_bot_core.engine.map import Map
+from dynmap_bot_core.models.spatial.chunk import Chunk
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
+from dynmap_bot_core.models.spatial.town import Town
+from dynmap_bot_core.models.spatial.map import Map
 
 
 class TestChunkMethods:
