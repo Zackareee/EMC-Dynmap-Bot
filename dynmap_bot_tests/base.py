@@ -1,5 +1,6 @@
 from PIL import ImageChops
 from dynmap_bot_core.utils import misc
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
 import pytest
 from unittest.mock import patch
 from PIL import Image
@@ -20,8 +21,8 @@ class TestBase:
         diff_array = np.array(diff)
         assert np.all(diff_array == 0), "Images do not match!"
 
-    def download_map_image(self, x: int, z: int):
-        return Image.open(f"{os.path.dirname(os.path.realpath(__file__))}/images/{x}_{z}.png")
+    def download_map_image(self, coord: Coordinate):
+        return Image.open(f"{os.path.dirname(os.path.realpath(__file__))}/images/{coord.x}_{coord.z}.png")
 
     def download_town(self, town_names: list[str]):
         result = []

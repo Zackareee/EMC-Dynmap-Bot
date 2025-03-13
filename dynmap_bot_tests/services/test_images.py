@@ -11,7 +11,6 @@ class TestCropMapAndImage(TestBase):
         map_obj: Map = build.build_map(town_names=["Sanctuary", "Gulf_Of_Guinea"])
         image_obj: Image = build.build_map_image(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
-
         self.assert_images(cropped_image, expected_image)
 
     def test_crop_with_nation_france(self) -> None:

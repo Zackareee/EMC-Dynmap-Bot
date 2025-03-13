@@ -1,6 +1,5 @@
 __all__ = ["map_images_as_dict"]
-
-import requests
+from dynmap_bot_core.models.spatial.coordinate import Coordinate
 from PIL import Image
 from io import BytesIO
 import requests
@@ -33,24 +32,21 @@ def download_nations(name: [str]) -> dict:
     return nation
 
 
-def map_images_as_dict(regions: list["Coordinate"]) -> dict[tuple[int, int], Image]:
+def map_images_as_dict(regions: list[Coordinate]) -> dict[Coordinate, Image]:
     """
     Given a list of region objects (x, z) these will be returned in a dictionary with an image object associated with
     each coordinate.
-    TODO consider returning dict[tuple[Coordinate],Image]
     :param regions: A list of (x, z) values where x and z are integers.
     :return: A dictionary of coordinates to image objects.
     """
     region_images = {}
     for coord in regions:
-        if (coord.x, coord.z) not in region_images.keys():
-            x = int(coord.x)
-            z = int(coord.z)
-            region_images[(x, z)] = download_map_image(x, z)
+        if coord not in region_images.keys():
+            region_images[coord] = download_map_image(coord)
     return region_images
 
 
-def download_map_image(x: int, z: int) -> Image:
+def download_map_image(coord: Coordinate) -> Image:
     """
     Given x and z coordinates, the tile png will be returned as an Image object
     TODO consider taking a Coordinate object
@@ -58,8 +54,6 @@ def download_map_image(x: int, z: int) -> Image:
     :param z: Int
     :return: Image object
     """
-    with requests.get(
-        f"https://map.earthmc.net/tiles/minecraft_overworld/3/{x}_{z}.png"
-    ) as r:
+    with requests.get(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{coord.x}_{coord.z}.png") as r:
         r.raise_for_status()
         return Image.open(BytesIO(r.content))
