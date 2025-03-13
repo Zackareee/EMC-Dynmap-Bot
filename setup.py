@@ -54,7 +54,7 @@ setup(
         "yarl",
     ],
     extras_require={
-        "dev": ["pytest", "mypy", "black"],  # Additional dependencies for development
+        "dev": ["pytest", "mypy", "black", "mypy"],  # Additional dependencies for development
     },
     include_package_data=True,  # Includes non-Python files specified in MANIFEST.in
 )
