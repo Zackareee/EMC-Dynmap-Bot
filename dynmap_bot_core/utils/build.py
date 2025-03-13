@@ -1,4 +1,4 @@
-__all__ = ["build_map", "build_towns", "build_map_image"]
+__all__ = ["build_map", "build_towns", "build_nations", "build_map_image"]
 from dynmap_bot_core.models.spatial.town import Town
 from dynmap_bot_core.models.spatial.map import Map
 from dynmap_bot_core.models.spatial.chunk import Chunk
