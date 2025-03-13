@@ -8,7 +8,7 @@ def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
     :param town_json: Town object as a dictionary.
     :return: list of ints for all coordinates.
     """
-    coordinates: list[list[int, int]] = town_json["coordinates"]["townBlocks"]
+    coordinates: list[list[int, int]] = [town_json["coordinates"]["townBlocks"]]
     return coordinates
 
 

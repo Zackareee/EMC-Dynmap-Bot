@@ -22,7 +22,7 @@ def build_towns(town_names: [str]) -> [Town]:
 
     for t in towns_json:
         coordinates = misc.unpack_town_coordinates(t)
-        town = Town([Chunk(x, 0, z) for x, z in coordinates])
+        town = Town([Chunk(x, 0, z) for x, z in coordinates[0]])
         town.nation_name = t["nation"]["name"]
         if town.nation_name is not None:
             nations.add(town.nation_name)

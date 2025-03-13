@@ -13,7 +13,7 @@ from dynmap_bot_core.models.spatial.coordinate import Coordinate
 from shapely.geometry import Polygon
 
 
-def stitch_images(images: dict[Coordinate, Image]) -> Image:
+def stitch_images(images: dict[tuple[int, int], Image]) -> Image:
     """
     Collates all images in a dictionary into a single image, placing them at their corresponding coordinate.
     :param images: A dictionary of image coordinates to image.
@@ -21,8 +21,8 @@ def stitch_images(images: dict[Coordinate, Image]) -> Image:
     """
     # Directory containing images
     TILESIZE: int = 512
-    x_coords: list[int] = [coord.x for coord in images.keys()]
-    z_coords: list[int] = [coord.z for coord in images.keys()]
+    x_coords: list[int] = [coord[0] for coord in images.keys()]
+    z_coords: list[int] = [coord[1] for coord in images.keys()]
 
     min_x, max_x = min(x_coords), max(x_coords)
     min_z, max_z = min(z_coords), max(z_coords)
@@ -35,9 +35,9 @@ def stitch_images(images: dict[Coordinate, Image]) -> Image:
     canvas: Image = Image.new(mode="RGBA", size=(canvas_width, canvas_height), color="white")
 
     # Place images on the canvas
-    for coord, img in images.items():
-        paste_x: int = (coord.x - min_x) * TILESIZE
-        paste_y: int = (coord.z - min_z) * TILESIZE  # Corrected Y-axis logic
+    for (x, y), img in images.items():
+        paste_x: int = (x - min_x) * TILESIZE
+        paste_y: int = (y - min_z) * TILESIZE  # Corrected Y-axis logic
         canvas.paste(img, (paste_x, paste_y))
     return canvas
 
