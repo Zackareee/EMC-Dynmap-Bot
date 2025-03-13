@@ -4,10 +4,23 @@ from dynmap_bot_core.engine.map import Map
 from dynmap_bot_core.engine.chunk import Chunk
 from dynmap_bot_core.engine.nation import Nation
 from dynmap_bot_core.engine.coordinate import Coordinate
-from dynmap_bot_core.download import common
-from dynmap_bot_core import download as dl
+from dynmap_bot_core.download import download
 from dynmap_bot_core.images import image as img
 from PIL import Image
+import urllib.parse
+
+
+def sanitize_filename(filename: str) -> str:
+    """
+    Serves as a helper function for tests to sanitize a filename to meet the windows filename requirements.
+    Use urllib.parse.unquote(str) to recover the filename.
+    :param filename:
+    :return:
+    """
+    safe_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_.() "
+    sanitized = urllib.parse.quote(filename, safe=safe_chars)
+    sanitized = sanitized.rstrip(" .")
+    return sanitized
 
 
 def unpack_town_coordinates(town_json: dict) -> list[list[int, int]]:
@@ -28,7 +41,7 @@ def build_towns(town_names: [str]) -> [Town]:
     :param town_names:
     :return:
     """
-    towns_json = common.download_towns(town_names)
+    towns_json = download.download_towns(town_names)
     result = []
     nations = set()
 
@@ -40,7 +53,7 @@ def build_towns(town_names: [str]) -> [Town]:
             nations.add(town.nation_name)
         result.append(town)
 
-    nations_json = common.download_nations(list(nations))
+    nations_json = download.download_nations(list(nations))
     nations_dict: dict = {nation["name"]: nation for nation in nations_json}
 
     for town in result:
@@ -56,7 +69,7 @@ def build_nations(nation_names: [str]) -> Nation:
     :param nation_name:
     :return:
     """
-    nations_json = common.download_nations(nation_names)
+    nations_json = download.download_nations(nation_names)
     result = []
     for n in nations_json:
         town_names_dict = n["towns"]
@@ -88,7 +101,7 @@ def build_image_with_map(map_obj: Map) -> Image:
     map_obj.normalise()
     map_obj.offset_towns(-Chunk.SIZE, 0, -Chunk.SIZE)
     map_obj.offset_towns(offset[0], 0, offset[1])
-    image_data = dl.map_images_as_dict(map_regions)
+    image_data = download.map_images_as_dict(map_regions)
     image: Image = img.make_image_collage(image_data)
 
     image = img.make_grids_on_collage(map_obj.get_town_polygons(), image)

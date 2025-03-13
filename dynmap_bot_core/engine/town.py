@@ -55,22 +55,9 @@ class Town:
     def as_polygon(self, color: str) -> ColorMultiPolygon:
         """
         Returns the town as a MultiPolygon object where the bounds of the polygon(s) are the border(s) of the town.
-        Sets the color to 50% opacity (#??????7F)
         :return:
         """
-        padding = Chunk.SIZE / 2
-        polygons: [ColorPolygon] = [
-            ColorPolygon(
-                f"{color}7F",
-                [
-                    (chunk.x - padding, chunk.z - padding),
-                    (chunk.x - padding, chunk.z + padding),
-                    (chunk.x + padding, chunk.z + padding),
-                    (chunk.x + padding, chunk.z - padding),
-                ],
-            )
-            for chunk in self.chunks
-        ]
+        polygons: [ColorPolygon] = [chunk.as_polygon(color) for chunk in self.chunks]
         unary_polygon: ColorMultiPolygon = colored_unary_union(polygons)
         return unary_polygon
 

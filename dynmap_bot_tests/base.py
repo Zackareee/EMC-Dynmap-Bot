@@ -1,5 +1,5 @@
 from PIL import ImageChops
-from dynmap_bot_core.download import common
+from dynmap_bot_core.engine import misc
 import pytest
 from unittest.mock import patch
 from PIL import Image
@@ -7,7 +7,6 @@ import json
 import io
 import os
 import numpy as np
-import shutil
 
 
 class TestBase:
@@ -30,7 +29,7 @@ class TestBase:
         result = []
         for town in town_names:
             with open(
-                f"{os.path.dirname(os.path.realpath(__file__))}/json/town/{common.sanitize_filename(town)}.json"
+                f"{os.path.dirname(os.path.realpath(__file__))}/json/town/{misc.sanitize_filename(town)}.json"
             ) as f:
                 result.append(json.load(f)[0])
         return result
@@ -39,7 +38,7 @@ class TestBase:
         result = []
         for nation in nation_names:
             with io.open(
-                f"{os.path.dirname(os.path.realpath(__file__))}/json/nation/{common.sanitize_filename(nation)}.json",
+                f"{os.path.dirname(os.path.realpath(__file__))}/json/nation/{misc.sanitize_filename(nation)}.json",
                 mode="r",
                 encoding="utf-8",
             ) as f:
@@ -52,10 +51,10 @@ class TestBase:
             "dynmap_bot_core.download.download.download_map_image",
             side_effect=self.download_map_image,
         ) as mock_map, patch(
-            "dynmap_bot_core.download.common.download_towns",
+            "dynmap_bot_core.download.download.download_towns",
             side_effect=self.download_town,
         ) as mock_town, patch(
-            "dynmap_bot_core.download.common.download_nations",
+            "dynmap_bot_core.download.download.download_nations",
             side_effect=self.download_nation,
         ) as mock_nation:
             yield {

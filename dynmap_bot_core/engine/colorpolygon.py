@@ -76,6 +76,13 @@ def colored_unary_union(
 ) -> ColorMultiPolygon:
     """
     Wrapper for unary_union that always returns a ColorMultiPolygon while preserving colors.
+    This takes a list of ColorPolygons, combines all overlapping polygons into the fewest amount of polygons and returns
+    the list of ColorMultiPolygons.
+    If a single polygon remains after combining all polygons, it will still be returned as a ColorMultiPolygon
+    containing a single ColorPolygon
+
+    :param colored_polygons: A list of ColorPolygons to combine
+    :return:
     """
 
     polygons: list[Polygon] = [cp._polygon for cp in colored_polygons]
