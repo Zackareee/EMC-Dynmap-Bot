@@ -1,9 +1,13 @@
 __all__ = ["map_images_as_dict"]
+
+
 from dynmap_bot_core.models.spatial.coordinate import Coordinate
 from PIL import Image
 from io import BytesIO
 import requests
 import json
+import asyncio
+from dynmap_bot_core.services.parallel_download import download_region_images
 
 
 def download_towns(name: [str]) -> dict:
@@ -39,21 +43,4 @@ def map_images_as_dict(regions: list[Coordinate]) -> dict[Coordinate, Image]:
     :param regions: A list of (x, z) values where x and z are integers.
     :return: A dictionary of coordinates to image objects.
     """
-    region_images = {}
-    for coord in regions:
-        if coord not in region_images.keys():
-            region_images[coord] = download_map_image(coord)
-    return region_images
-
-
-def download_map_image(coord: Coordinate) -> Image:
-    """
-    Given x and z coordinates, the tile png will be returned as an Image object
-    TODO consider taking a Coordinate object
-    :param x: Int
-    :param z: Int
-    :return: Image object
-    """
-    with requests.get(f"https://map.earthmc.net/tiles/minecraft_overworld/3/{coord.x}_{coord.z}.png") as r:
-        r.raise_for_status()
-        return Image.open(BytesIO(r.content))
+    return asyncio.run(download_region_images(regions))

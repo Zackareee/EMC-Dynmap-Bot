@@ -13,6 +13,8 @@ import numpy as np
 class TestBase:
     """Base test class that provides common assertions."""
 
+    use_mock = True  # Default to using the mock
+
     TESTDIR = os.path.dirname(os.path.realpath(__file__))
 
     def assert_images(self, cropped_image, expected_image):
@@ -21,8 +23,14 @@ class TestBase:
         diff_array = np.array(diff)
         assert np.all(diff_array == 0), "Images do not match!"
 
-    def download_map_image(self, coord: Coordinate):
-        return Image.open(f"{os.path.dirname(os.path.realpath(__file__))}/images/{coord.x}_{coord.z}.png")
+    def download_map_images(self, coords: [Coordinate]):
+        images = {
+            coord: Image.open(
+                f"{os.path.dirname(os.path.realpath(__file__))}/images/{coord.x}_{coord.z}.png",
+            )
+            for coord in coords
+        }
+        return images
 
     def download_town(self, town_names: list[str]):
         result = []
@@ -46,9 +54,12 @@ class TestBase:
 
     @pytest.fixture(autouse=True)
     def mocked_downloads(self):
+        if not self.use_mock:
+            yield {}  # Provide an empty dictionary when mocking is disabled
+            return
         with patch(
-            "dynmap_bot_core.services.download.download_map_image",
-            side_effect=self.download_map_image,
+            "dynmap_bot_core.services.download.map_images_as_dict",
+            side_effect=self.download_map_images,
         ) as mock_map, patch(
             "dynmap_bot_core.services.download.download_towns",
             side_effect=self.download_town,
@@ -57,7 +68,7 @@ class TestBase:
             side_effect=self.download_nation,
         ) as mock_nation:
             yield {
-                "download_map_image": mock_map,
                 "download_towns": mock_town,
                 "download_nations": mock_nation,
+                "map_images_as_dict": mock_map,
             }
