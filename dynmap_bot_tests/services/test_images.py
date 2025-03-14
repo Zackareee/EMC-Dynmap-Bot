@@ -19,7 +19,7 @@ class TestCropMapAndImage(TestBase):
         map_obj: Map = build.build_nations(nation_names=["France"])
         image_obj: Image = build.build_map_image(map_obj)
         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
-        cropped_image.show()
+
         self.assert_images(cropped_image, expected_image)
 
     def test_crop_with_nation_colors(self) -> None:
@@ -57,15 +57,15 @@ class TestBuildImageWithMap(TestBase):
 
         self.assert_images(image_obj, expected_image)
 
-
-class TestLiveData(TestBase):
-    use_mock = False  # Disable mock for this test class
-
-    def test_crop_with_nation_france(self) -> None:
-        expected_image = Image.open(f"{self.TESTDIR}/snapshots/test_crop_with_nation_france.png")
-
-        map_obj: Map = build.build_nations(nation_names=["France"])
-        image_obj: Image = build.build_map_image(map_obj)
-        cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
-        cropped_image.show()
-        self.assert_images(cropped_image, expected_image)
+#
+# class TestLiveData(TestBase):
+#     use_mock = False  # Disable mock for this test class
+#
+#     def test_crop_with_nation_france(self) -> None:
+#         expected_image = Image.open(f"{self.TESTDIR}/snapshots/test_crop_with_nation_france.png")
+#
+#         map_obj: Map = build.build_nations(nation_names=["France"])
+#         image_obj: Image = build.build_map_image(map_obj)
+#         cropped_image: Image = image.crop_map_and_image(map_obj, image_obj)
+#         cropped_image.show()
+#         self.assert_images(cropped_image, expected_image)

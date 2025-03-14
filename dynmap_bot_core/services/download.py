@@ -36,22 +36,6 @@ def download_nations(name: [str]) -> dict:
     return nation
 
 
-def generate_rectangle_coordinates(coords: list[Coordinate]) -> list[Coordinate]:
-    if not coords:
-        return []
-
-    # Find min and max values for x and z
-    min_x = min(coord.x for coord in coords)
-    max_x = max(coord.x for coord in coords)
-    min_z = min(coord.z for coord in coords)
-    max_z = max(coord.z for coord in coords)
-
-    # Generate all points within the rectangle
-    rectangle_coords = [Coordinate(x, 0, z) for x in range(min_x, max_x + 1) for z in range(min_z, max_z + 1)]
-
-    return rectangle_coords
-
-
 def map_images_as_dict(regions: list[Coordinate]) -> dict[Coordinate, Image]:
     """
     Given a list of region objects (x, z) these will be returned in a dictionary with an image object associated with
@@ -59,5 +43,4 @@ def map_images_as_dict(regions: list[Coordinate]) -> dict[Coordinate, Image]:
     :param regions: A list of (x, z) values where x and z are integers.
     :return: A dictionary of coordinates to image objects.
     """
-    regions = generate_rectangle_coordinates(regions)
     return asyncio.run(download_region_images(regions))
