@@ -1,5 +1,5 @@
 > [!IMPORTANT]
-> The Discord Dynmap Bot implementation has been depricated and is still available on the `discord` branch. This version has historical tracking built in, whereas the rewrite will not include tracking until v0.3 is released. 
+> The Discord Dynmap Bot implementation has been depricated and is still available on the `discord` branch. The `discord` version has historical tracking built in, whereas the rewrite will not include tracking until v0.3 is released. 
 
 # EMCMap 🗺️
 
