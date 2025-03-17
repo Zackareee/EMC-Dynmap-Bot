@@ -1,3 +1,6 @@
+> [!IMPORTANT]
+> The Discord Dynmap Bot implementation has been depricated and is still available on the `discord` branch. This version has historical tracking built in, whereas the rewrite will not include tracking until v0.3 is released. 
+
 # EMCMap 🗺️
 
 **EMCMap**  is a Python module and command-line tool for rendering images of towns or nations from [EarthMC](map.earthmc.net).   
